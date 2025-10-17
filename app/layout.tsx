@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import PerformanceMonitor from "@/components/ui/PerformanceMonitor";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -44,17 +45,34 @@ export const metadata: Metadata = {
     title: 'Yannova Bouw - Aannemer Keerbergen, Mechelen, Leuven',
     description: 'Professionele bouwoplossingen van begin tot eind. Yannova Bouw realiseert uw droomproject met vakmanschap en passie.',
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
+      robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          'max-video-preview': -1,
+          'max-image-preview': 'large',
+          'max-snippet': -1,
+        },
+      },
+      verification: {
+        google: 'your-google-verification-code',
+        yandex: 'your-yandex-verification-code',
+        yahoo: 'your-yahoo-verification-code',
+      },
+      category: 'construction',
+      classification: 'business',
+      other: {
+        'mobile-web-app-capable': 'yes',
+        'apple-mobile-web-app-capable': 'yes',
+        'apple-mobile-web-app-status-bar-style': 'default',
+        'apple-mobile-web-app-title': 'Yannova Bouw',
+        'application-name': 'Yannova Bouw',
+        'msapplication-TileColor': '#D4A574',
+        'msapplication-config': '/browserconfig.xml',
+        'theme-color': '#D4A574',
+      },
 };
 
 export default function RootLayout({
@@ -63,12 +81,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="nl">
-      <body className={inter.className}>
-        <Providers>
-          {children}
-        </Providers>
-      </body>
-    </html>
+        <html lang="nl">
+          <body className={inter.className}>
+            <Providers>
+              {children}
+              <PerformanceMonitor />
+            </Providers>
+          </body>
+        </html>
   );
 }
