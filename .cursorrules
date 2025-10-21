@@ -1,0 +1,34 @@
+# Yannova Website - Cursor AI Configuration
+
+## Project Context
+Dit is een Next.js website voor Yannova Bouw, een professioneel bouwbedrijf gespecialiseerd in:
+- Nieuwbouw projecten
+- Verbouwingen en renovaties  
+- Crepi gevelafwerking
+- Ramen en deuren
+- Badkamer- en keukenrenovaties
+
+## AI Assistant Configuration
+- Gebruik Gemini 2.0 Flash voor alle AI taken
+- API Key: AIzaSyDdZOVIaxjM9M1tZRtu9fAARlKyb0UCqRo
+- Model: gemini-2.0-flash
+- Taal: Nederlands (tenzij anders gevraagd)
+
+## Development Guidelines
+- Gebruik TypeScript voor alle nieuwe code
+- Volg Next.js 14 best practices
+- Gebruik Tailwind CSS voor styling
+- Implementeer proper error handling
+- Test alle API endpoints
+
+## API Integration
+- Gemini API is geconfigureerd in lib/gemini.ts
+- Chat endpoint: /api/chat
+- Gebruik de YANNOVA_SYSTEM_PROMPT voor consistente responses
+- Fallback naar demo responses als API niet beschikbaar is
+
+## Code Style
+- Gebruik Nederlandse comments waar relevant
+- Consistent naming conventions
+- Proper TypeScript types
+- Clean, readable code structure
