@@ -39,8 +39,28 @@ const nextConfig = {
 
   // Bundle optimalisatie
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    // Fix for originalFactory error en Gemini AI
-    if (!isServer) {
+    // Fix for server-side rendering issues
+    if (isServer) {
+      // Prevent client-side code from being bundled in server bundle
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          ...config.optimization?.splitChunks,
+          cacheGroups: {
+            ...config.optimization?.splitChunks?.cacheGroups,
+            default: false,
+            vendors: false,
+          },
+        },
+      };
+
+      // Exclude 'self' package from server bundle to prevent conflicts
+      config.externals = config.externals || [];
+      config.externals.push({
+        'self': 'self'
+      });
+    } else {
+      // Client-side polyfills
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,
@@ -55,14 +75,37 @@ const nextConfig = {
         assert: false,
         os: false,
         path: false,
+        // Browser polyfills
+        global: require.resolve('globalthis/polyfill'),
+        self: require.resolve('self'),
+      };
+
+      // Add browser polyfills
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        global: require.resolve('globalthis/polyfill'),
+        self: require.resolve('self'),
       };
     }
 
-    // Fix for 'self is not defined' error
+    // Global polyfills for both server and client
+    config.plugins.push(
+      new webpack.ProvidePlugin({
+        Buffer: ['buffer', 'Buffer'],
+        process: 'process/browser',
+      })
+    );
+
+    // Define browser globals
     config.plugins.push(
       new webpack.DefinePlugin({
-        'typeof window': JSON.stringify(isServer ? 'undefined' : 'object'),
-        'typeof self': JSON.stringify(isServer ? 'undefined' : 'object'),
+        'typeof window': JSON.stringify('object'),
+        'typeof document': JSON.stringify('object'),
+        'typeof self': JSON.stringify('object'),
+        'typeof global': JSON.stringify('object'),
+        'global': 'globalThis',
+        'self': 'self',
+        'global.self': 'globalThis.self',
       })
     );
 

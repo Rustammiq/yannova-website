@@ -5,7 +5,17 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { signOut } from "next-auth/react";
 import { ArrowLeft, Settings } from "lucide-react";
-import PhotoManager from "@/components/admin/PhotoManager";
+import dynamic from 'next/dynamic';
+
+const PhotoManager = dynamic(() => import("@/components/admin/PhotoManager"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center py-12">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yannova-primary"></div>
+      <span className="ml-2 text-gray-600">Foto beheer laden...</span>
+    </div>
+  ),
+});
 
 export default function PhotosPage() {
   const { data: session, status } = useSession();

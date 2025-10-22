@@ -7,8 +7,19 @@ import Chatbot from "@/components/chatbot/Chatbot";
 import Link from "next/link";
 import Image from "next/image";
 import { photoManager } from "@/lib/photoManager";
-import InlinePhotoEditor from "@/components/admin/InlinePhotoEditor";
+import dynamic from 'next/dynamic';
 import { usePhotos } from "@/lib/usePhotos";
+
+const InlinePhotoEditor = dynamic(() => import("@/components/admin/InlinePhotoEditor"), {
+  ssr: false,
+  loading: () => (
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {Array.from({ length: 16 }).map((_, i) => (
+        <div key={i} className="aspect-square bg-gray-200 rounded-lg animate-pulse" />
+      ))}
+    </div>
+  ),
+});
 
 export default function ProjectfotosPage() {
   // Load photos for gallery

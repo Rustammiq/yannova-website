@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAdmin } from '@/lib/adminContext';
 import { Button } from '@/components/ui/Button';
+import dynamic from 'next/dynamic';
 import { 
   Upload, 
   Trash2, 

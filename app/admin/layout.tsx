@@ -1,12 +1,13 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import Loading from '@/components/ui/Loading';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Image as ImageIcon, FileText, Mail, Eye, LogOut } from 'lucide-react';
+import { LayoutDashboard, Image as ImageIcon, FileText, Mail, Eye, LogOut, Lock } from 'lucide-react';
+import ChangePasswordModal from '@/components/admin/ChangePasswordModal';
 
-function SidebarNav() {
+function SidebarNav({ onPasswordChange }: { onPasswordChange: () => void }) {
   const pathname = usePathname();
   const items = [
     { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -43,6 +44,13 @@ function SidebarNav() {
           );
         })}
         <button
+          onClick={onPasswordChange}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
+        >
+          <Lock className="w-4 h-4" />
+          <span>Wachtwoord Wijzigen</span>
+        </button>
+        <button
           onClick={() => window.location.href = '/api/auth/signout'}
           className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
         >
@@ -59,10 +67,12 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+
   return (
     <div className="min-h-screen bg-gray-800">
       <div className="md:flex md:min-h-screen">
-        <SidebarNav />
+        <SidebarNav onPasswordChange={() => setShowPasswordModal(true)} />
         <main className="flex-1 min-w-0">
           <div className="md:h-16 h-14 bg-gray-900 border-b border-gray-700 flex items-center px-4">
             <h1 className="text-lg font-semibold text-white">Beheer</h1>
@@ -74,6 +84,11 @@ export default function AdminLayout({
           </div>
         </main>
       </div>
+
+      <ChangePasswordModal
+        isOpen={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
+      />
     </div>
   );
 }
