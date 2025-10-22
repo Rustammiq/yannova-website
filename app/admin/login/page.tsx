@@ -148,8 +148,16 @@ export default function LoginPage() {
               Email: admin@yannova.nl
             </p>
             <p className="text-xs text-gray-400 mt-2">
-              (Stel wachtwoord in via .env bestand)
+              Wachtwoord: admin123 (demo mode)
             </p>
+            <div className="mt-3 pt-3 border-t border-gray-200">
+              <p className="text-xs text-gray-600 mb-2">
+                Eerste keer inloggen? Gebruik "admin123" als wachtwoord.
+              </p>
+              <p className="text-xs text-gray-600">
+                Na inloggen kun je je wachtwoord wijzigen via de admin interface.
+              </p>
+            </div>
           </div>
         </div>
       </div>

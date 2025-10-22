@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
+  // output: 'standalone',
   images: {
     remotePatterns: [
       {
@@ -19,39 +19,52 @@ const nextConfig = {
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 60,
+    minimumCacheTTL: 86400, // Verhoogd naar 24 uur
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    // Nieuwe optimalisaties
+    unoptimized: false,
   },
-  compress: true,
-  poweredByHeader: false,
-  generateEtags: true,
+
+  // Performance optimalisaties - minimale configuratie
   experimental: {
-    esmExternals: 'loose',
+    optimizePackageImports: ['lucide-react'],
   },
-  webpack: (config, { isServer }) => {
-    // Fix for originalFactory error and Gemini AI
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-        crypto: false,
-        stream: false,
-        url: false,
-        zlib: false,
-        http: false,
-        https: false,
-        assert: false,
-        os: false,
-        path: false,
+
+  // Static optimization
+  staticPageGenerationTimeout: 1000,
+
+  // Bundle optimalisatie - vereenvoudigd voor Vercel
+  // Bundle optimalisatie - minimale configuratie voor Vercel Edge Runtime
+  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    // Performance optimalisaties - alleen voor client-side en non-dev
+    if (!dev && !isServer) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              chunks: 'all',
+              priority: 10,
+            },
+            lucide: {
+              test: /[\\/]node_modules[\\/]lucide-react[\\/]/,
+              name: 'lucide',
+              chunks: 'all',
+              priority: 20,
+            },
+          },
+        },
       };
     }
 
-
     return config;
   },
+
+  // Build optimalisatie
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -103,12 +116,30 @@ const nextConfig = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=86400',
+            value: 'public, max-age=31536000, immutable',
           },
         ],
       },
       {
         source: '/favicon.ico',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/icons/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/videos/(.*)',
         headers: [
           {
             key: 'Cache-Control',

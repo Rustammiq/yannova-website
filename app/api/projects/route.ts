@@ -10,7 +10,7 @@ let projects = [
     type: "Nieuwbouw",
     status: "completed",
     budget: "€450.000",
-    images: ["/images/projects/project-1-villa.jpg"],
+    images: ["/images/projects/project-1-nieuwbouw.jpg"],
     createdAt: "2024-01-15",
     updatedAt: "2024-01-20",
   },
@@ -22,7 +22,7 @@ let projects = [
     type: "Renovatie",
     status: "in-progress",
     budget: "€25.000",
-    images: ["/images/projects/project-4-bathroom.jpg"],
+    images: ["/images/projects/project-2-renovatie.jpg"],
     createdAt: "2024-02-01",
     updatedAt: "2024-02-10",
   },
@@ -34,9 +34,33 @@ let projects = [
     type: "Gevelwerk",
     status: "planning",
     budget: "€18.500",
-    images: ["/images/projects/project-7-crepi.jpg"],
+    images: ["/images/projects/project-3-gevelwerk.jpg"],
     createdAt: "2024-02-15",
     updatedAt: "2024-02-15",
+  },
+  {
+    id: "4",
+    title: "Ramen en Deuren Renovatie",
+    description: "Nieuwe ramen en deuren voor betere isolatie en uitstraling",
+    location: "Leuven",
+    type: "Ramen & Deuren",
+    status: "completed",
+    budget: "€35.000",
+    images: ["/images/projects/project-4-ramen-&-deuren.jpg"],
+    createdAt: "2024-01-20",
+    updatedAt: "2024-02-05",
+  },
+  {
+    id: "5",
+    title: "Keuken Renovatie Project",
+    description: "Complete keukenrenovatie met moderne apparatuur en design",
+    location: "Keerbergen",
+    type: "Renovatie",
+    status: "in-progress",
+    budget: "€42.000",
+    images: ["/images/projects/project-5-renovatie.jpg"],
+    createdAt: "2024-02-10",
+    updatedAt: "2024-02-20",
   },
 ];
 
@@ -67,6 +91,25 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error creating project:', error);
     return NextResponse.json({ error: 'Failed to create project' }, { status: 500 });
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { id, ...updates } = body;
+    
+    const projectIndex = projects.findIndex(project => project.id === id);
+    if (projectIndex === -1) {
+      return NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+    
+    projects[projectIndex] = { ...projects[projectIndex], ...updates };
+    
+    return NextResponse.json(projects[projectIndex]);
+  } catch (error) {
+    console.error('Error updating project:', error);
+    return NextResponse.json({ error: 'Failed to update project' }, { status: 500 });
   }
 }
 

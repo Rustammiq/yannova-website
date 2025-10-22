@@ -5,6 +5,8 @@
 ### **✅ Slideshow Video's Gemaakt**
 - ✅ **Project 1**: `project-1-slideshow.mp4` - Moderne Villa (10 sec)
 - ✅ **Project 2**: `project-2-slideshow.mp4` - Monumentaal Pand (10 sec)
+- ✅ **Project 3**: `project-3-slideshow.mp4` - Kantoor Gebouw (5 sec)
+- ✅ **Project 4**: `project-4-slideshow.mp4` - Badkamer Renovatie (5 sec)
 - ✅ **Project 5**: `project-5-slideshow.mp4` - Aanbouw Woonhuis (10 sec)
 - ✅ **Project 7**: `project-7-slideshow.mp4` - Gevelrenovatie Crepi (10 sec)
 
@@ -23,10 +25,11 @@
 ## 📊 **Huidige Status:**
 
 ### **Video Kwaliteit:**
-- **4/9 projecten** hebben slideshow video's
-- **10 seconden** per video
+- **6/10 projecten** hebben slideshow video's
+- **5-10 seconden** per video (afhankelijk van aantal afbeeldingen)
 - **1920x1080** resolutie
 - **MP4 format** voor web compatibiliteit
+- **Crossfade transitions** tussen afbeeldingen
 
 ### **Website Functionaliteit:**
 - ✅ **Project kaarten** tonen video's met fallback naar afbeeldingen
@@ -65,10 +68,17 @@
 
 ```
 public/videos/projects/
-├── project-1-slideshow.mp4 ✅
-├── project-2-slideshow.mp4 ✅
-├── project-5-slideshow.mp4 ✅
-└── project-7-slideshow.mp4 ✅
+├── project-1-slideshow.mp4 ✅ (Moderne Villa)
+├── project-2-slideshow.mp4 ✅ (Monumentaal Pand)
+├── project-3-slideshow.mp4 ✅ (Kantoor Gebouw)
+├── project-4-slideshow.mp4 ✅ (Badkamer Renovatie)
+├── project-5-slideshow.mp4 ✅ (Aanbouw Woonhuis)
+└── project-7-slideshow.mp4 ✅ (Gevelrenovatie Crepi)
+
+🎬 Additionele Yannova Video's:
+├── yannova-ramen-deuren.mp4 ✅ (4MB - Professionele montage)
+├── yannova-renovatie.mp4 ✅ (3.5MB - Renovatie showcase)
+└── yannova-vakmanschap.mp4 ✅ (3.4MB - Vakmanschap demo)
 ```
 
 ## 🚀 **Live Website Features:**
@@ -120,10 +130,11 @@ python3 create-slideshow-videos.py
 
 ## 📈 **Performance Metrics:**
 
-- **Video grootte**: ~1-2MB per 10 seconden
-- **Loading tijd**: <2 seconden met poster
+- **Slideshow grootte**: ~130-270KB per video (geoptimaliseerd)
+- **Loading tijd**: <2 seconden met poster images
 - **Compatibility**: Alle moderne browsers
-- **Mobile friendly**: Touch controls
+- **Mobile friendly**: Touch controls en responsive design
+- **Lazy loading**: Video's laden alleen bij hover/click
 
 ## 🔧 **Technische Details:**
 

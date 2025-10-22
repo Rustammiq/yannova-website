@@ -1,0 +1,43 @@
+[config]
+# PR Agent configuratie voor Yannova Bouw Website
+
+[pr_reviewer]
+# Automatische review inschakelen
+auto_review = true
+
+# Focus op Nederlandse bouwtermen en context
+project_type = "web_application"
+language = "nl"
+
+# Code review focus
+review_focus_areas = [
+    "security",
+    "performance",
+    "maintainability",
+    "best_practices"
+]
+
+# Specifieke regels voor Next.js projecten
+extra_instructions = """
+Dit is een Next.js website voor een bouwbedrijf (Yannova Bouw).
+Focus op:
+- SEO optimalisatie voor lokale bouwbedrijven
+- Performance voor snelle laadtijden
+- Security voor admin functionaliteiten
+- Nederlandse bouwterminologie in comments
+- TypeScript type safety
+"""
+
+[pr_description]
+# Automatische PR beschrijvingen genereren
+auto_description = true
+auto_title = true
+
+[pr_questions]
+# Stel relevante vragen over bouwprojecten en functionaliteit
+enable = true
+
+[pr_code_suggestions]
+# Code suggesties voor verbeteringen
+enable = true
+auto_title = true

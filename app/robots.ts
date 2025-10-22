@@ -11,7 +11,10 @@ export default function robots(): MetadataRoute.Robots {
           '/api/',
           '/_next/',
           '/private/',
+          '/tmp/',
+          '*.json$',
         ],
+        crawlDelay: 1,
       },
       {
         userAgent: 'Googlebot',
@@ -20,9 +23,40 @@ export default function robots(): MetadataRoute.Robots {
           '/admin/',
           '/api/',
         ],
+        crawlDelay: 0,
+      },
+      {
+        userAgent: 'Googlebot-Mobile',
+        allow: '/',
+        disallow: [
+          '/admin/',
+          '/api/',
+        ],
+        crawlDelay: 0,
+      },
+      {
+        userAgent: 'Googlebot-Image',
+        allow: [
+          '/images/',
+          '/projecten/',
+        ],
+        disallow: [
+          '/admin/',
+          '/api/',
+        ],
+      },
+      {
+        userAgent: 'bingbot',
+        allow: '/',
+        disallow: [
+          '/admin/',
+          '/api/',
+          '/private/',
+        ],
+        crawlDelay: 1,
       },
     ],
-    sitemap: 'https://yannova.nl/sitemap.xml',
-    host: 'https://yannova.nl',
+    sitemap: 'https://yannova.be/sitemap.xml',
+    host: 'https://yannova.be',
   }
 }

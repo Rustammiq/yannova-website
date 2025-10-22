@@ -174,7 +174,7 @@ export default function SEOPage() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       if (editingPage) {
-        setSeoData(seoData.map(item => 
+        setSeoData(prevSeoData => prevSeoData.map(item => 
           item.id === editingPage.id 
             ? { ...editingPage, lastUpdated: new Date().toISOString().split('T')[0] }
             : item
@@ -188,7 +188,7 @@ export default function SEOPage() {
           score: Math.floor(Math.random() * 20) + 70, // Random score 70-90
           lastUpdated: new Date().toISOString().split('T')[0],
         };
-        setSeoData([newSEOData, ...seoData]);
+        setSeoData(prevSeoData => [newSEOData, ...prevSeoData]);
         setNewSEO({
           page: "",
           title: "",
@@ -206,7 +206,7 @@ export default function SEOPage() {
 
   if (status === "loading" || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-800">
         <Loader2 className="animate-spin text-yannova-primary" size={48} />
       </div>
     );
@@ -217,15 +217,15 @@ export default function SEOPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-800">
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-gray-900 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => router.push("/admin")}
-                className="flex items-center space-x-2 text-gray-600 hover:text-yannova-primary transition-colors"
+                className="flex items-center space-x-2 text-gray-300 hover:text-yannova-primary transition-colors"
               >
                 <ArrowLeft size={20} />
                 <span>Terug naar Dashboard</span>
@@ -237,7 +237,7 @@ export default function SEOPage() {
             </div>
             <button
               onClick={() => signOut({ callbackUrl: "/admin/login" })}
-              className="text-gray-600 hover:text-red-600 transition-colors"
+              className="text-gray-300 hover:text-red-600 transition-colors"
             >
               Uitloggen
             </button>
@@ -248,65 +248,65 @@ export default function SEOPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* SEO Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-gray-900 rounded-lg shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Gemiddelde SEO Score</p>
+                <p className="text-sm font-medium text-gray-300">Gemiddelde SEO Score</p>
                 <p className="text-3xl font-bold text-green-600">82</p>
               </div>
               <div className="bg-green-100 p-3 rounded-full">
                 <TrendingUp className="text-green-600" size={24} />
               </div>
             </div>
-            <p className="text-sm text-gray-500 mt-2">+5% deze maand</p>
+            <p className="text-sm text-gray-400 mt-2">+5% deze maand</p>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-gray-900 rounded-lg shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Geïndexeerde Pagina's</p>
+                <p className="text-sm font-medium text-gray-300">Geïndexeerde Pagina's</p>
                 <p className="text-3xl font-bold text-blue-600">12</p>
               </div>
               <div className="bg-blue-100 p-3 rounded-full">
                 <Globe className="text-blue-600" size={24} />
               </div>
             </div>
-            <p className="text-sm text-gray-500 mt-2">Alle pagina's geïndexeerd</p>
+            <p className="text-sm text-gray-400 mt-2">Alle pagina's geïndexeerd</p>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-gray-900 rounded-lg shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Keywords Ranking</p>
+                <p className="text-sm font-medium text-gray-300">Keywords Ranking</p>
                 <p className="text-3xl font-bold text-purple-600">6</p>
               </div>
               <div className="bg-purple-100 p-3 rounded-full">
                 <Target className="text-purple-600" size={24} />
               </div>
             </div>
-            <p className="text-sm text-gray-500 mt-2">Top 10 rankings</p>
+            <p className="text-sm text-gray-400 mt-2">Top 10 rankings</p>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-gray-900 rounded-lg shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Organisch Verkeer</p>
+                <p className="text-sm font-medium text-gray-300">Organisch Verkeer</p>
                 <p className="text-3xl font-bold text-orange-600">2.4K</p>
               </div>
               <div className="bg-orange-100 p-3 rounded-full">
                 <BarChart3 className="text-orange-600" size={24} />
               </div>
             </div>
-            <p className="text-sm text-gray-500 mt-2">+15% deze maand</p>
+            <p className="text-sm text-gray-400 mt-2">+15% deze maand</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* SEO Pages */}
-          <div className="bg-white rounded-lg shadow-sm">
-            <div className="p-6 border-b border-gray-200">
+          <div className="bg-gray-900 rounded-lg shadow-sm">
+            <div className="p-6 border-b border-gray-700">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold text-gray-900">SEO Pagina's</h2>
+                <h2 className="text-xl font-bold text-white">SEO Pagina's</h2>
                 <button
                   onClick={() => setShowAddModal(true)}
                   className="bg-yannova-primary text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-yannova-primary/90 transition-colors"
@@ -320,11 +320,11 @@ export default function SEOPage() {
             <div className="p-6">
               <div className="space-y-4">
                 {seoData.map((seo) => (
-                  <div key={seo.id} className="border border-gray-200 rounded-lg p-4">
+                  <div key={seo.id} className="border border-gray-700 rounded-lg p-4">
                     <div className="flex justify-between items-start mb-3">
                       <div>
-                        <h3 className="font-semibold text-gray-900">{seo.page}</h3>
-                        <p className="text-sm text-gray-600">{seo.title}</p>
+                        <h3 className="font-semibold text-white">{seo.page}</h3>
+                        <p className="text-sm text-gray-300">{seo.title}</p>
                       </div>
                       <div className="flex items-center space-x-2">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -344,20 +344,20 @@ export default function SEOPage() {
                       </div>
                     </div>
                     
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">{seo.description}</p>
+                    <p className="text-sm text-gray-300 mb-3 line-clamp-2">{seo.description}</p>
                     
                     <div className="flex flex-wrap gap-1 mb-3">
                       {seo.keywords.slice(0, 3).map((keyword, index) => (
-                        <span key={index} className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
+                        <span key={index} className="bg-gray-700 text-gray-200 px-2 py-1 rounded text-xs">
                           {keyword}
                         </span>
                       ))}
                       {seo.keywords.length > 3 && (
-                        <span className="text-gray-500 text-xs">+{seo.keywords.length - 3} meer</span>
+                        <span className="text-gray-400 text-xs">+{seo.keywords.length - 3} meer</span>
                       )}
                     </div>
                     
-                    <p className="text-xs text-gray-500">Laatst bijgewerkt: {seo.lastUpdated}</p>
+                    <p className="text-xs text-gray-400">Laatst bijgewerkt: {seo.lastUpdated}</p>
                   </div>
                 ))}
               </div>
@@ -365,21 +365,21 @@ export default function SEOPage() {
           </div>
 
           {/* Keywords */}
-          <div className="bg-white rounded-lg shadow-sm">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">Keyword Rankings</h2>
+          <div className="bg-gray-900 rounded-lg shadow-sm">
+            <div className="p-6 border-b border-gray-700">
+              <h2 className="text-xl font-bold text-white">Keyword Rankings</h2>
             </div>
 
             <div className="p-6">
               <div className="space-y-4">
                 {keywords.map((keyword) => (
-                  <div key={keyword.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div key={keyword.id} className="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
                     <div className="flex-1">
                       <div className="flex items-center space-x-2">
                         <Hash className="text-gray-400" size={16} />
-                        <span className="font-medium text-gray-900">{keyword.keyword}</span>
+                        <span className="font-medium text-white">{keyword.keyword}</span>
                       </div>
-                      <div className="flex items-center space-x-4 mt-1 text-sm text-gray-600">
+                      <div className="flex items-center space-x-4 mt-1 text-sm text-gray-300">
                         <span>Positie: #{keyword.position}</span>
                         <span>Volume: {keyword.volume.toLocaleString()}</span>
                         <span>Moeilijkheid: {keyword.difficulty}%</span>
@@ -410,15 +410,15 @@ export default function SEOPage() {
       {/* Edit/Add Modal */}
       {(editingPage || showAddModal) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          <div className="bg-gray-900 rounded-xl shadow-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold text-white mb-6">
               {editingPage ? 'SEO Bewerken' : 'Nieuwe SEO Pagina'}
             </h2>
             
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Pagina</label>
+                  <label className="block text-sm font-medium text-gray-200 mb-2">Pagina</label>
                   <input
                     type="text"
                     value={editingPage?.page || newSEO.page}
@@ -426,7 +426,7 @@ export default function SEOPage() {
                       ? setEditingPage({ ...editingPage, page: e.target.value })
                       : setNewSEO({ ...newSEO, page: e.target.value })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary"
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary focus:border-yannova-primary text-white placeholder-gray-400"
                     placeholder="Homepage, Diensten, etc."
                   />
                 </div>
@@ -452,7 +452,7 @@ export default function SEOPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">SEO Titel</label>
+                <label className="block text-sm font-medium text-gray-200 mb-2">SEO Titel</label>
                 <input
                   type="text"
                   value={editingPage?.title || newSEO.title}
@@ -460,27 +460,27 @@ export default function SEOPage() {
                     ? setEditingPage({ ...editingPage, title: e.target.value })
                     : setNewSEO({ ...newSEO, title: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary focus:border-yannova-primary text-white placeholder-gray-400"
                   placeholder="SEO-geoptimaliseerde titel"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Meta Beschrijving</label>
+                <label className="block text-sm font-medium text-gray-200 mb-2">Meta Beschrijving</label>
                 <textarea
                   value={editingPage?.description || newSEO.description}
                   onChange={(e) => editingPage 
                     ? setEditingPage({ ...editingPage, description: e.target.value })
                     : setNewSEO({ ...newSEO, description: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary focus:border-yannova-primary text-white placeholder-gray-400"
                   rows={3}
                   placeholder="Meta beschrijving voor zoekmachines"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Keywords</label>
+                <label className="block text-sm font-medium text-gray-200 mb-2">Keywords</label>
                 <input
                   type="text"
                   value={editingPage?.keywords.join(", ") || newSEO.keywords}
@@ -488,20 +488,20 @@ export default function SEOPage() {
                     ? setEditingPage({ ...editingPage, keywords: e.target.value.split(",").map(k => k.trim()) })
                     : setNewSEO({ ...newSEO, keywords: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary focus:border-yannova-primary text-white placeholder-gray-400"
                   placeholder="keyword1, keyword2, keyword3"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Reclame Tekst</label>
+                <label className="block text-sm font-medium text-gray-200 mb-2">Reclame Tekst</label>
                 <textarea
                   value={editingPage?.adText || newSEO.adText}
                   onChange={(e) => editingPage 
                     ? setEditingPage({ ...editingPage, adText: e.target.value })
                     : setNewSEO({ ...newSEO, adText: e.target.value })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary"
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary focus:border-yannova-primary text-white placeholder-gray-400"
                   rows={3}
                   placeholder="Reclame tekst voor Google Ads"
                 />
@@ -514,12 +514,25 @@ export default function SEOPage() {
                   setEditingPage(null);
                   setShowAddModal(false);
                 }}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                className="px-4 py-2 text-gray-300 hover:text-gray-200 transition-colors"
               >
                 Annuleren
               </button>
               <button
-                onClick={() => handleSaveSEO(seoData)}
+                onClick={() => {
+                  if (editingPage) {
+                    handleSaveSEO(editingPage);
+                  } else {
+                    const newSEOData: SEOData = {
+                      id: Date.now().toString(),
+                      ...newSEO,
+                      keywords: newSEO.keywords.split(",").map(k => k.trim()),
+                      score: Math.floor(Math.random() * 20) + 70,
+                      lastUpdated: new Date().toISOString().split('T')[0],
+                    };
+                    handleSaveSEO(newSEOData);
+                  }
+                }}
                 className="bg-yannova-primary text-white px-6 py-2 rounded-lg flex items-center space-x-2 hover:bg-yannova-primary/90 transition-colors"
               >
                 <Save size={20} />

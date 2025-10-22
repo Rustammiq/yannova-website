@@ -47,23 +47,27 @@ export default function Navigation() {
   }, []);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900/20 backdrop-blur-md shadow-soft border-b border-gray-200/30">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900/20 backdrop-blur-md shadow-soft border-b border-gray-200/30 transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20 pt-4">
-          {/* Logo */}
+          {/* Enhanced Logo */}
           <div 
             className="flex items-center group cursor-pointer"
             onClick={() => setIsLoginModalOpen(true)}
             title="Klik voor admin login"
           >
-            <Image
-              src="/images/logo-yannova.png"
-              alt="Yannova Bouw Logo"
-              width={250}
-              height={125}
-              className="h-20 w-auto transition-transform duration-200 group-hover:scale-105 mt-2 mb-1"
-              priority
-            />
+            <div className="relative">
+              <Image
+                src="/images/logo-yannova.png"
+                alt="Yannova Bouw Logo"
+                width={250}
+                height={125}
+                className="h-20 w-auto transition-all duration-300 group-hover:scale-105 group-hover:drop-shadow-lg mt-2 mb-1"
+                priority
+              />
+              {/* Subtle glow effect on hover */}
+              <div className="absolute inset-0 bg-yannova-primary/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm"></div>
+            </div>
           </div>
 
           {/* Desktop Menu */}
@@ -75,6 +79,7 @@ export default function Navigation() {
                     onClick={() => setIsLocationsOpen(!isLocationsOpen)}
                     className="flex items-center text-white hover:text-yannova-primary transition-colors duration-200 font-medium group focus-visible:outline-2 focus-visible:outline-yannova-primary focus-visible:outline-offset-2"
                     aria-haspopup="true"
+                    aria-expanded={isLocationsOpen}
                     aria-label={`${item.name} submenu`}
                   >
                     {item.name}
@@ -87,6 +92,7 @@ export default function Navigation() {
                   {isLocationsOpen && (
                     <div 
                       className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-medium border border-gray-100 py-2 animate-scale-in"
+                      role="menu"
                       aria-label={`${item.name} submenu`}
                     >
                       {item.submenu.map((subItem) => (
@@ -94,6 +100,7 @@ export default function Navigation() {
                           key={subItem.name}
                           href={subItem.href}
                           className="flex items-center px-4 py-3 text-gray-700 hover:bg-yannova-primary/5 hover:text-yannova-primary transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-yannova-primary focus-visible:outline-offset-2"
+                          role="menuitem"
                         >
                           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-3 text-yannova-primary" aria-hidden="true">
                             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
@@ -109,13 +116,21 @@ export default function Navigation() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="text-white hover:text-yannova-primary transition-colors duration-200 font-medium relative group"
+                  className="text-white/90 hover:text-white transition-colors duration-200 font-medium relative group"
                 >
                   {item.name}
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-yannova-primary transition-all duration-200 group-hover:w-full"></span>
                 </Link>
               )
             ))}
+            <Link
+              href="/contact"
+              className="ml-2 btn-modern hidden lg:inline-flex items-center gap-2"
+              aria-label="Vraag een offerte aan"
+            >
+              Offerte aanvragen
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -124,6 +139,7 @@ export default function Navigation() {
             className="md:hidden p-2 rounded-lg text-white hover:text-yannova-primary hover:bg-white/10 transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-yannova-primary focus-visible:outline-offset-2"
             aria-label={isOpen ? "Sluit menu" : "Open menu"}
             aria-controls="mobile-menu"
+            aria-expanded={isOpen}
           >
             {isOpen ?
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -144,7 +160,7 @@ export default function Navigation() {
         {isOpen && (
           <div 
             id="mobile-menu"
-            className="md:hidden pb-6 border-t border-gray-200/30 bg-gray-900/20 backdrop-blur-md animate-slide-in-from-left"
+            className="md:hidden pb-6 border-t border-gray-200/10 bg-gray-900/40 backdrop-blur-md animate-slide-in-left"
             role="navigation"
             aria-label="Hoofdmenu"
           >

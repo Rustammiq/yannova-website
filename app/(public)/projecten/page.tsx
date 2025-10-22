@@ -6,6 +6,19 @@ import Chatbot from "@/components/chatbot/Chatbot";
 import Image from "next/image";
 import { photoManager } from "@/lib/photoManager";
 import { useEffect, useState } from "react";
+import dynamic from 'next/dynamic';
+import { usePhotos } from "@/lib/usePhotos";
+
+const InlinePhotoEditor = dynamic(() => import("@/components/admin/InlinePhotoEditor"), {
+  ssr: false,
+  loading: () => (
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} className="aspect-square bg-gray-200 rounded-lg animate-pulse" />
+      ))}
+    </div>
+  ),
+});
 
 interface Project {
   id: string;
@@ -23,6 +36,12 @@ interface Project {
 export default function ProjectenPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Load photos for gallery
+  const { photos: galleryPhotos, updatePhotos: updateGalleryPhotos } = usePhotos({ 
+    category: 'gallery', 
+    limit: 8 
+  });
 
   useEffect(() => {
     loadProjects();
@@ -45,13 +64,13 @@ export default function ProjectenPage() {
   };
 
   // Get unique project image using PhotoManager
-  const getProjectImage = (id: number) => {
+  const _getProjectImage = (id: number) => {
     const photo = photoManager.getProjectPhoto(id);
     return photo.src;
   };
 
   // Video mapping for projects with videos - using real Yannova videos
-  const getProjectVideo = (id: number) => {
+  const _getProjectVideo = (id: number) => {
     const videoMap: { [key: number]: string } = {
       1: 'project-1-slideshow.mp4',
       2: 'project-2-slideshow.mp4',
@@ -608,27 +627,33 @@ export default function ProjectenPage() {
             </div>
           </div>
 
-          {/* Foto Galerij Placeholder */}
-          <div className="bg-gradient-to-r from-yannova-primary/5 to-yannova-primary/10 rounded-xl p-8 text-center">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              Projectfoto Galerij
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Bekijk onze meest recente projecten met crepi, ramen en deuren renovaties
-            </p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                <div key={i} className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg flex items-center justify-center">
-                  <span className="text-gray-500 text-sm">Foto {i}</span>
-                </div>
-              ))}
+          {/* Foto Galerij met Inline Editor */}
+          <div className="bg-gradient-to-r from-yannova-primary/5 to-yannova-primary/10 rounded-xl p-8">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-4">
+                Projectfoto Galerij
+              </h3>
+              <p className="text-gray-600">
+                Bekijk onze meest recente projecten met crepi, ramen en deuren renovaties
+              </p>
             </div>
-            <button
-              className="mt-6 bg-yannova-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-yannova-primary/90 transition-colors"
-              onClick={() => console.log('Bekijk alle foto\'s')}
-            >
-              Bekijk Alle Foto's
-            </button>
+            
+            <InlinePhotoEditor
+              photos={galleryPhotos}
+              onPhotosUpdate={updateGalleryPhotos}
+              maxPhotos={8}
+              category="gallery"
+              aspectRatio="aspect-square"
+            />
+            
+            <div className="text-center mt-6">
+              <button
+                className="bg-yannova-primary text-white px-6 py-3 rounded-lg font-semibold hover:bg-yannova-primary/90 transition-colors"
+                onClick={() => console.log('Bekijk alle foto\'s')}
+              >
+                Bekijk Alle Foto's
+              </button>
+            </div>
           </div>
         </div>
       </section>

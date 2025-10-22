@@ -20,7 +20,7 @@ export default function ContactPage() {
     "name": "Yannova Bouw",
     "description": "Professionele bouwoplossingen van begin tot eind. Nieuwbouw, renovatie, crepi en verbouwingen.",
     "url": "https://yannova.nl",
-    "telephone": "+31 6 12 34 56 78",
+    "telephone": "+32 489960001",
     "email": "info@yannova.nl",
     "address": {
       "@type": "PostalAddress",
@@ -182,10 +182,10 @@ export default function ContactPage() {
                       Telefoon
                     </h3>
                     <a
-                      href="tel:+31612345678"
+                      href="tel:+32489960001"
                       className="text-gray-600 hover:text-yannova-primary"
                     >
-                      +31 6 12 34 56 78
+                      +32 489960001
                     </a>
                   </div>
                 </div>

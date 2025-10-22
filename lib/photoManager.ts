@@ -10,10 +10,15 @@ export class PhotoManager {
   private static instance: PhotoManager;
   private photos: PhotoInfo[] = [
     { src: "/images/projects/project-1-villa.jpg", alt: "Villa nieuwbouw project - Professional", category: "nieuwbouw", used: false },
+    { src: "/images/projects/project-1-nieuwbouw.jpg", alt: "Moderne Villa Keerbergen - Nieuwbouw project", category: "nieuwbouw", used: false },
     { src: "/images/projects/project-2-monument.jpg", alt: "Monument renovatie project - Professional", category: "renovatie", used: false },
+    { src: "/images/projects/project-2-renovatie.jpg", alt: "Badkamer Renovatie Mechelen - Renovatie project", category: "renovatie", used: false },
     { src: "/images/projects/project-3-office.jpg", alt: "Kantoor renovatie project - Professional", category: "verbouwing", used: false },
+    { src: "/images/projects/project-3-gevelwerk.jpg", alt: "Crepi Gevelafwerking Putte - Gevelwerk project", category: "crepi", used: false },
     { src: "/images/projects/project-4-bathroom.jpg", alt: "Badkamer renovatie project - Professional", category: "renovatie", used: false },
+    { src: "/images/projects/project-4-ramen-&-deuren.jpg", alt: "Ramen en Deuren Renovatie - Ramen & Deuren project", category: "ramen-deuren", used: false },
     { src: "/images/projects/project-5-extension.jpg", alt: "Uitbreiding project - Professional", category: "verbouwing", used: false },
+    { src: "/images/projects/project-5-renovatie.jpg", alt: "Keuken Renovatie Project - Renovatie project", category: "renovatie", used: false },
     { src: "/images/projects/project-6-apartments.jpg", alt: "Appartementen project - Professional", category: "nieuwbouw", used: false },
     { src: "/images/projects/project-7-crepi.jpg", alt: "Crepi gevelafwerking project - Professional", category: "crepi", used: false },
     { src: "/images/projects/project-8-windows.jpg", alt: "Ramen en deuren project - Professional", category: "ramen-deuren", used: false },

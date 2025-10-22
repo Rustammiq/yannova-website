@@ -58,11 +58,11 @@ export default function Footer() {
                     </svg>
                   </div>
                   <Link 
-                    href="tel:+31612345678" 
+                    href="tel:+32489960001" 
                     className="text-gray-300 hover:text-yannova-primary transition-colors focus-visible:outline-2 focus-visible:outline-yannova-primary focus-visible:outline-offset-2"
-                    aria-label="Bel ons op +31 6 12 34 56 78"
+                    aria-label="Bel ons op +32 489960001"
                   >
-                    +31 6 12 34 56 78
+                    +32 489960001
                   </Link>
                 </li>
                 <li className="flex items-start space-x-3">
