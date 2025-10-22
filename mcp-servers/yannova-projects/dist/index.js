@@ -1,13 +1,20 @@
 #!/usr/bin/env node
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const index_js_1 = require("@modelcontextprotocol/sdk/server/index.js");
 const stdio_js_1 = require("@modelcontextprotocol/sdk/server/stdio.js");
 const types_js_1 = require("@modelcontextprotocol/sdk/types.js");
 const api_client_js_1 = require("./api-client.js");
 class YannovaProjectsServer {
-    server;
-    apiClient;
     constructor() {
         this.apiClient = new api_client_js_1.YannovaProjectsApiClient(process.env.YANNOVA_API_URL);
         this.server = new index_js_1.Server({
@@ -24,7 +31,7 @@ class YannovaProjectsServer {
     }
     setupResourceHandlers() {
         // Resources for projects information
-        this.server.setRequestHandler(types_js_1.ListResourcesRequestSchema, async () => {
+        this.server.setRequestHandler(types_js_1.ListResourcesRequestSchema, () => __awaiter(this, void 0, void 0, function* () {
             return {
                 resources: [
                     {
@@ -59,13 +66,13 @@ class YannovaProjectsServer {
                     },
                 ],
             };
-        });
-        this.server.setRequestHandler(types_js_1.ReadResourceRequestSchema, async (request) => {
+        }));
+        this.server.setRequestHandler(types_js_1.ReadResourceRequestSchema, (request) => __awaiter(this, void 0, void 0, function* () {
             const { uri } = request.params;
             try {
                 switch (uri) {
                     case 'yannova://projects':
-                        const projects = await this.apiClient.getProjects();
+                        const projects = yield this.apiClient.getProjects();
                         return {
                             contents: [
                                 {
@@ -76,7 +83,7 @@ class YannovaProjectsServer {
                             ],
                         };
                     case 'yannova://projects/stats':
-                        const stats = await this.apiClient.getProjectStats();
+                        const stats = yield this.apiClient.getProjectStats();
                         return {
                             contents: [
                                 {
@@ -87,7 +94,7 @@ class YannovaProjectsServer {
                             ],
                         };
                     case 'yannova://projects/by-location':
-                        const byLocation = await this.apiClient.getProjectsByLocation();
+                        const byLocation = yield this.apiClient.getProjectsByLocation();
                         return {
                             contents: [
                                 {
@@ -98,7 +105,7 @@ class YannovaProjectsServer {
                             ],
                         };
                     case 'yannova://projects/by-type':
-                        const byType = await this.apiClient.getProjectsByType();
+                        const byType = yield this.apiClient.getProjectsByType();
                         return {
                             contents: [
                                 {
@@ -109,7 +116,7 @@ class YannovaProjectsServer {
                             ],
                         };
                     case 'yannova://projects/by-status':
-                        const byStatus = await this.apiClient.getProjectsByStatus();
+                        const byStatus = yield this.apiClient.getProjectsByStatus();
                         return {
                             contents: [
                                 {
@@ -127,32 +134,32 @@ class YannovaProjectsServer {
                 console.error('Error reading resource:', error);
                 throw error;
             }
-        });
+        }));
     }
     setupToolHandlers() {
         // Tools for project management
-        this.server.setRequestHandler(types_js_1.CallToolRequestSchema, async (request) => {
+        this.server.setRequestHandler(types_js_1.CallToolRequestSchema, (request) => __awaiter(this, void 0, void 0, function* () {
             const { name, arguments: args } = request.params;
             try {
                 switch (name) {
                     case 'get_projects':
-                        return await this.handleGetProjects(args);
+                        return yield this.handleGetProjects(args);
                     case 'get_project':
-                        return await this.handleGetProject(args);
+                        return yield this.handleGetProject(args);
                     case 'create_project':
-                        return await this.handleCreateProject(args);
+                        return yield this.handleCreateProject(args);
                     case 'update_project':
-                        return await this.handleUpdateProject(args);
+                        return yield this.handleUpdateProject(args);
                     case 'delete_project':
-                        return await this.handleDeleteProject(args);
+                        return yield this.handleDeleteProject(args);
                     case 'filter_projects':
-                        return await this.handleFilterProjects(args);
+                        return yield this.handleFilterProjects(args);
                     case 'get_project_stats':
-                        return await this.handleGetProjectStats();
+                        return yield this.handleGetProjectStats();
                     case 'get_projects_summary':
-                        return await this.handleGetProjectsSummary();
+                        return yield this.handleGetProjectsSummary();
                     case 'estimate_project_cost':
-                        return await this.handleEstimateProjectCost(args);
+                        return yield this.handleEstimateProjectCost(args);
                     default:
                         throw new Error(`Unknown tool: ${name}`);
                 }
@@ -169,232 +176,252 @@ class YannovaProjectsServer {
                     isError: true,
                 };
             }
+        }));
+    }
+    handleGetProjects(args) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let projects;
+            if (args.filter) {
+                projects = yield this.apiClient.getProjectsByFilter(args.filter);
+            }
+            else {
+                projects = yield this.apiClient.getProjects();
+            }
+            const projectList = projects
+                .map((project) => {
+                const statusEmoji = {
+                    planning: '📋',
+                    'in-progress': '🔨',
+                    completed: '✅'
+                }[project.status] || '❓';
+                return `${statusEmoji} **${project.title}**\n   📍 ${project.location} | ${project.type}\n   💰 ${project.budget}\n   📝 ${project.description}`;
+            })
+                .join('\n\n');
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: `📁 **Yannova Projecten (${projects.length})**\n\n${projectList}`,
+                    },
+                ],
+            };
         });
     }
-    async handleGetProjects(args) {
-        let projects;
-        if (args.filter) {
-            projects = await this.apiClient.getProjectsByFilter(args.filter);
-        }
-        else {
-            projects = await this.apiClient.getProjects();
-        }
-        const projectList = projects
-            .map((project) => {
+    handleGetProject(args) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { id } = args;
+            const project = yield this.apiClient.getProject(id);
             const statusEmoji = {
                 planning: '📋',
                 'in-progress': '🔨',
                 completed: '✅'
             }[project.status] || '❓';
-            return `${statusEmoji} **${project.title}**\n   📍 ${project.location} | ${project.type}\n   💰 ${project.budget}\n   📝 ${project.description}`;
-        })
-            .join('\n\n');
-        return {
-            content: [
-                {
-                    type: 'text',
-                    text: `📁 **Yannova Projecten (${projects.length})**\n\n${projectList}`,
-                },
-            ],
-        };
+            const projectDetails = `${statusEmoji} **${project.title}**\n\n` +
+                `📍 **Locatie:** ${project.location}\n` +
+                `🏗️ **Type:** ${project.type}\n` +
+                `📊 **Status:** ${project.status}\n` +
+                `💰 **Budget:** ${project.budget}\n` +
+                `📅 **Aangemaakt:** ${project.createdAt}\n` +
+                `📝 **Beschrijving:**\n${project.description}\n\n` +
+                `🖼️ **Afbeeldingen:** ${project.images.length > 0 ? project.images.length + ' afbeeldingen' : 'Geen afbeeldingen'}`;
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: projectDetails,
+                    },
+                ],
+            };
+        });
     }
-    async handleGetProject(args) {
-        const { id } = args;
-        const project = await this.apiClient.getProject(id);
-        const statusEmoji = {
-            planning: '📋',
-            'in-progress': '🔨',
-            completed: '✅'
-        }[project.status] || '❓';
-        const projectDetails = `${statusEmoji} **${project.title}**\n\n` +
-            `📍 **Locatie:** ${project.location}\n` +
-            `🏗️ **Type:** ${project.type}\n` +
-            `📊 **Status:** ${project.status}\n` +
-            `💰 **Budget:** ${project.budget}\n` +
-            `📅 **Aangemaakt:** ${project.createdAt}\n` +
-            `📝 **Beschrijving:**\n${project.description}\n\n` +
-            `🖼️ **Afbeeldingen:** ${project.images.length > 0 ? project.images.length + ' afbeeldingen' : 'Geen afbeeldingen'}`;
-        return {
-            content: [
-                {
-                    type: 'text',
-                    text: projectDetails,
-                },
-            ],
-        };
+    handleCreateProject(args) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const project = yield this.apiClient.createProject(args);
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: `✅ **Nieuw project aangemaakt!**\n\n📋 **${project.title}**\n📍 ${project.location}\n🏗️ ${project.type}\n💰 ${project.budget}\n📝 ${project.description}`,
+                    },
+                ],
+            };
+        });
     }
-    async handleCreateProject(args) {
-        const project = await this.apiClient.createProject(args);
-        return {
-            content: [
-                {
-                    type: 'text',
-                    text: `✅ **Nieuw project aangemaakt!**\n\n📋 **${project.title}**\n📍 ${project.location}\n🏗️ ${project.type}\n💰 ${project.budget}\n📝 ${project.description}`,
-                },
-            ],
-        };
+    handleUpdateProject(args) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const project = yield this.apiClient.updateProject(args);
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: `🔄 **Project bijgewerkt!**\n\n📋 **${project.title}**\n📍 ${project.location}\n🏗️ ${project.type}\n📊 ${project.status}\n💰 ${project.budget}`,
+                    },
+                ],
+            };
+        });
     }
-    async handleUpdateProject(args) {
-        const project = await this.apiClient.updateProject(args);
-        return {
-            content: [
-                {
-                    type: 'text',
-                    text: `🔄 **Project bijgewerkt!**\n\n📋 **${project.title}**\n📍 ${project.location}\n🏗️ ${project.type}\n📊 ${project.status}\n💰 ${project.budget}`,
-                },
-            ],
-        };
+    handleDeleteProject(args) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { id } = args;
+            yield this.apiClient.deleteProject(id);
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: `🗑️ **Project verwijderd!**\n\nProject met ID ${id} is succesvol verwijderd.`,
+                    },
+                ],
+            };
+        });
     }
-    async handleDeleteProject(args) {
-        const { id } = args;
-        await this.apiClient.deleteProject(id);
-        return {
-            content: [
-                {
-                    type: 'text',
-                    text: `🗑️ **Project verwijderd!**\n\nProject met ID ${id} is succesvol verwijderd.`,
-                },
-            ],
-        };
+    handleFilterProjects(args) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const filter = {};
+            if (args.status)
+                filter.status = args.status;
+            if (args.type)
+                filter.type = args.type;
+            if (args.location)
+                filter.location = args.location;
+            const projects = yield this.apiClient.getProjectsByFilter(filter);
+            return yield this.handleGetProjects({ filter });
+        });
     }
-    async handleFilterProjects(args) {
-        const filter = {};
-        if (args.status)
-            filter.status = args.status;
-        if (args.type)
-            filter.type = args.type;
-        if (args.location)
-            filter.location = args.location;
-        const projects = await this.apiClient.getProjectsByFilter(filter);
-        return await this.handleGetProjects({ filter });
+    handleGetProjectStats() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const stats = yield this.apiClient.getProjectStats();
+            const statsText = `📊 **Yannova Project Statistieken**\n\n` +
+                `📈 **Totaal Projects:** ${stats.total}\n` +
+                `✅ **Voltooid:** ${stats.completed}\n` +
+                `🔨 **Bezig:** ${stats.inProgress}\n` +
+                `📋 **Planning:** ${stats.planning}\n\n` +
+                `💰 **Totaal Budget:** ${stats.totalBudget}\n` +
+                `📊 **Gemiddeld Budget:** ${stats.averageBudget}\n\n` +
+                `📍 **Locaties:** ${stats.locations.join(', ')}\n` +
+                `🏗️ **Types:** ${stats.types.join(', ')}`;
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: statsText,
+                    },
+                ],
+            };
+        });
     }
-    async handleGetProjectStats() {
-        const stats = await this.apiClient.getProjectStats();
-        const statsText = `📊 **Yannova Project Statistieken**\n\n` +
-            `📈 **Totaal Projects:** ${stats.total}\n` +
-            `✅ **Voltooid:** ${stats.completed}\n` +
-            `🔨 **Bezig:** ${stats.inProgress}\n` +
-            `📋 **Planning:** ${stats.planning}\n\n` +
-            `💰 **Totaal Budget:** ${stats.totalBudget}\n` +
-            `📊 **Gemiddeld Budget:** ${stats.averageBudget}\n\n` +
-            `📍 **Locaties:** ${stats.locations.join(', ')}\n` +
-            `🏗️ **Types:** ${stats.types.join(', ')}`;
-        return {
-            content: [
-                {
-                    type: 'text',
-                    text: statsText,
-                },
-            ],
-        };
-    }
-    async handleGetProjectsSummary() {
-        const projects = await this.apiClient.getProjects();
-        const stats = await this.apiClient.getProjectStats();
-        const completedProjects = projects.filter(p => p.status === 'completed');
-        const inProgressProjects = projects.filter(p => p.status === 'in-progress');
-        const planningProjects = projects.filter(p => p.status === 'planning');
-        let summary = `📋 **Yannova Projecten Overzicht**\n\n`;
-        summary += `📊 **Samenvatting:** ${stats.total} projecten, ${stats.totalBudget} totaal budget\n\n`;
-        if (completedProjects.length > 0) {
-            summary += `✅ **Voltooide Projecten (${completedProjects.length}):**\n`;
-            completedProjects.slice(0, 3).forEach(project => {
-                summary += `   • ${project.title} (${project.location}) - ${project.budget}\n`;
-            });
-            if (completedProjects.length > 3) {
-                summary += `   ... en ${completedProjects.length - 3} andere\n`;
+    handleGetProjectsSummary() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const projects = yield this.apiClient.getProjects();
+            const stats = yield this.apiClient.getProjectStats();
+            const completedProjects = projects.filter(p => p.status === 'completed');
+            const inProgressProjects = projects.filter(p => p.status === 'in-progress');
+            const planningProjects = projects.filter(p => p.status === 'planning');
+            let summary = `📋 **Yannova Projecten Overzicht**\n\n`;
+            summary += `📊 **Samenvatting:** ${stats.total} projecten, ${stats.totalBudget} totaal budget\n\n`;
+            if (completedProjects.length > 0) {
+                summary += `✅ **Voltooide Projecten (${completedProjects.length}):**\n`;
+                completedProjects.slice(0, 3).forEach(project => {
+                    summary += `   • ${project.title} (${project.location}) - ${project.budget}\n`;
+                });
+                if (completedProjects.length > 3) {
+                    summary += `   ... en ${completedProjects.length - 3} andere\n`;
+                }
+                summary += `\n`;
             }
-            summary += `\n`;
-        }
-        if (inProgressProjects.length > 0) {
-            summary += `🔨 **Lopende Projecten (${inProgressProjects.length}):**\n`;
-            inProgressProjects.forEach(project => {
-                summary += `   • ${project.title} (${project.location}) - ${project.budget}\n`;
-            });
-            summary += `\n`;
-        }
-        if (planningProjects.length > 0) {
-            summary += `📋 **Geplande Projecten (${planningProjects.length}):**\n`;
-            planningProjects.forEach(project => {
-                summary += `   • ${project.title} (${project.location}) - ${project.budget}\n`;
-            });
-            summary += `\n`;
-        }
-        return {
-            content: [
-                {
-                    type: 'text',
-                    text: summary,
-                },
-            ],
-        };
+            if (inProgressProjects.length > 0) {
+                summary += `🔨 **Lopende Projecten (${inProgressProjects.length}):**\n`;
+                inProgressProjects.forEach(project => {
+                    summary += `   • ${project.title} (${project.location}) - ${project.budget}\n`;
+                });
+                summary += `\n`;
+            }
+            if (planningProjects.length > 0) {
+                summary += `📋 **Geplande Projecten (${planningProjects.length}):**\n`;
+                planningProjects.forEach(project => {
+                    summary += `   • ${project.title} (${project.location}) - ${project.budget}\n`;
+                });
+                summary += `\n`;
+            }
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: summary,
+                    },
+                ],
+            };
+        });
     }
-    async handleEstimateProjectCost(args) {
-        const { type, size = 'gemiddeld', location = 'Vlaanderen', features = [] } = args;
-        // Base costs for different project types (in euros)
-        const baseCosts = {
-            'nieuwbouw': { min: 200000, max: 600000, avg: 350000 },
-            'renovatie': { min: 15000, max: 150000, avg: 50000 },
-            'badkamer': { min: 8000, max: 25000, avg: 15000 },
-            'keuken': { min: 10000, max: 30000, avg: 18000 },
-            'crepi': { min: 5000, max: 20000, avg: 12000 },
-            'ramen-deuren': { min: 3000, max: 15000, avg: 8000 },
-            'dakwerken': { min: 10000, max: 40000, avg: 22000 }
-        };
-        const projectType = Object.keys(baseCosts).find(key => type.toLowerCase().includes(key)) || 'renovatie';
-        const baseCost = baseCosts[projectType];
-        // Size multiplier
-        const sizeMultiplier = {
-            'klein': 0.7,
-            'gemiddeld': 1.0,
-            'groot': 1.4,
-            'extra-groot': 1.8
-        }[size] || 1.0;
-        // Feature multipliers
-        let featureMultiplier = 1.0;
-        if (features.length > 0) {
-            featureMultiplier = 1 + (features.length * 0.1); // 10% per extra feature
-        }
-        // Location multiplier (Vlaanderen variations)
-        const locationMultiplier = {
-            'antwerpen': 1.1,
-            'brussel': 1.3,
-            'gent': 1.05,
-            'brugge': 1.0,
-            'leuven': 1.0,
-            'mechelen': 1.0,
-            'hasselt': 0.95,
-            'vlaanderen': 1.0
-        }[location.toLowerCase()] || 1.0;
-        const estimatedCost = Math.round(baseCost.avg * sizeMultiplier * featureMultiplier * locationMultiplier);
-        const costRange = {
-            min: Math.round(baseCost.min * sizeMultiplier * featureMultiplier * locationMultiplier),
-            max: Math.round(baseCost.max * sizeMultiplier * featureMultiplier * locationMultiplier)
-        };
-        const estimate = `💰 **Kostenraming voor ${type}**\n\n` +
-            `📍 **Locatie:** ${location}\n` +
-            `📐 **Grootte:** ${size}\n` +
-            `⭐ **Extra features:** ${features.length > 0 ? features.join(', ') : 'Geen'}\n\n` +
-            `💶 **Geschatte kosten:** €${estimatedCost.toLocaleString()}\n` +
-            `📊 **Kostenbereik:** €${costRange.min.toLocaleString()} - €${costRange.max.toLocaleString()}\n\n` +
-            `📝 **Inclusief:**\n` +
-            `   • Materialen en arbeid\n` +
-            `   • BTW (21%)\n` +
-            `   • Basis planning en coördinatie\n\n` +
-            `⚠️ **Let op:** Dit is een indicatie. Voor een exacte offerte nemen we graag de tijd voor een persoonlijk gesprek!`;
-        return {
-            content: [
-                {
-                    type: 'text',
-                    text: estimate,
-                },
-            ],
-        };
+    handleEstimateProjectCost(args) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { type, size = 'gemiddeld', location = 'Vlaanderen', features = [] } = args;
+            // Base costs for different project types (in euros)
+            const baseCosts = {
+                'nieuwbouw': { min: 200000, max: 600000, avg: 350000 },
+                'renovatie': { min: 15000, max: 150000, avg: 50000 },
+                'badkamer': { min: 8000, max: 25000, avg: 15000 },
+                'keuken': { min: 10000, max: 30000, avg: 18000 },
+                'crepi': { min: 5000, max: 20000, avg: 12000 },
+                'ramen-deuren': { min: 3000, max: 15000, avg: 8000 },
+                'dakwerken': { min: 10000, max: 40000, avg: 22000 }
+            };
+            const projectType = Object.keys(baseCosts).find(key => type.toLowerCase().includes(key)) || 'renovatie';
+            const baseCost = baseCosts[projectType];
+            // Size multiplier
+            const sizeMultiplier = {
+                'klein': 0.7,
+                'gemiddeld': 1.0,
+                'groot': 1.4,
+                'extra-groot': 1.8
+            }[size] || 1.0;
+            // Feature multipliers
+            let featureMultiplier = 1.0;
+            if (features.length > 0) {
+                featureMultiplier = 1 + (features.length * 0.1); // 10% per extra feature
+            }
+            // Location multiplier (Vlaanderen variations)
+            const locationMultiplier = {
+                'antwerpen': 1.1,
+                'brussel': 1.3,
+                'gent': 1.05,
+                'brugge': 1.0,
+                'leuven': 1.0,
+                'mechelen': 1.0,
+                'hasselt': 0.95,
+                'vlaanderen': 1.0
+            }[location.toLowerCase()] || 1.0;
+            const estimatedCost = Math.round(baseCost.avg * sizeMultiplier * featureMultiplier * locationMultiplier);
+            const costRange = {
+                min: Math.round(baseCost.min * sizeMultiplier * featureMultiplier * locationMultiplier),
+                max: Math.round(baseCost.max * sizeMultiplier * featureMultiplier * locationMultiplier)
+            };
+            const estimate = `💰 **Kostenraming voor ${type}**\n\n` +
+                `📍 **Locatie:** ${location}\n` +
+                `📐 **Grootte:** ${size}\n` +
+                `⭐ **Extra features:** ${features.length > 0 ? features.join(', ') : 'Geen'}\n\n` +
+                `💶 **Geschatte kosten:** €${estimatedCost.toLocaleString()}\n` +
+                `📊 **Kostenbereik:** €${costRange.min.toLocaleString()} - €${costRange.max.toLocaleString()}\n\n` +
+                `📝 **Inclusief:**\n` +
+                `   • Materialen en arbeid\n` +
+                `   • BTW (21%)\n` +
+                `   • Basis planning en coördinatie\n\n` +
+                `⚠️ **Let op:** Dit is een indicatie. Voor een exacte offerte nemen we graag de tijd voor een persoonlijk gesprek!`;
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: estimate,
+                    },
+                ],
+            };
+        });
     }
-    async start() {
-        const transport = new stdio_js_1.StdioServerTransport();
-        await this.server.connect(transport);
-        console.error('Yannova Projects MCP server is running...');
+    start() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const transport = new stdio_js_1.StdioServerTransport();
+            yield this.server.connect(transport);
+            console.error('Yannova Projects MCP server is running...');
+        });
     }
 }
 // Start the server

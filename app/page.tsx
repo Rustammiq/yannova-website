@@ -12,9 +12,33 @@ import Image from "next/image";
 import { ArrowRight, MapPin, Calendar, Quote, Star, Sparkles, Award, Users, Clock } from "lucide-react";
 import { photoManager } from "@/lib/photoManager";
 import { useEffect, useMemo, useState } from "react";
+import InlineTextEditor from "@/components/admin/InlineTextEditor";
+import InlineImageEditor from "@/components/admin/InlineImageEditor";
+import { useContent } from "@/lib/useContent";
 
 export default function HomePage() {
   const [scrollY, setScrollY] = useState(0);
+  
+  // Content management voor inline editing
+  const mainTitle = useContent({ 
+    key: 'homepage-main-title', 
+    defaultValue: 'Van Begin tot Eind\nProject Afronding' 
+  });
+  
+  const mainDescription = useContent({ 
+    key: 'homepage-main-description', 
+    defaultValue: 'Van nieuwbouw tot renovatie, crepi gevelafwerking tot ramen en deuren - wij realiseren uw droomproject met vakmanschap en passie.' 
+  });
+
+  // Load content bij component mount
+  useEffect(() => {
+    mainTitle.loadContent();
+    mainDescription.loadContent();
+  }, [mainTitle.loadContent, mainDescription.loadContent]);
+
+  // Fallback content voor als er geen data is
+  const displayTitle = mainTitle.content || 'Van Begin tot Eind\nProject Afronding';
+  const displayDescription = mainDescription.content || 'Van nieuwbouw tot renovatie, crepi gevelafwerking tot ramen en deuren - wij realiseren uw droomproject met vakmanschap en passie.';
 
   // Respecteer reduced-motion en optimaliseer scroll naar rAF + passive listener
   const prefersReducedMotion = useMemo(() => {
@@ -110,8 +134,7 @@ export default function HomePage() {
                   alt="Yannova Bouw Logo"
                   width={600}
                   height={300}
-                  className="h-64 w-auto mx-auto filter brightness-0 invert transition-all duration-500 group-hover:brightness-100 group-hover:invert-0 group-hover:drop-shadow-[0_0_30px_rgba(255,255,255,0.8)]"
-                  priority
+                  className="h-56 w-auto mx-auto filter brightness-0 invert transition-all duration-500 group-hover:brightness-100 group-hover:invert-0 group-hover:drop-shadow-[0_0_30px_rgba(255,255,255,0.8)]"
                 />
                 {/* Enhanced Glow effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-yannova-primary/20 via-white/10 to-yannova-primary/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 scale-150"></div>
@@ -137,17 +160,26 @@ export default function HomePage() {
           {/* Enhanced Main Heading */}
           <ScrollReveal delay={600}>
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight text-white text-shadow-2xl">
-              Van <span className="gradient-text text-shadow-lg">Begin</span> tot <span className="gradient-text text-shadow-lg">Eind</span>
-              <br />
-              <span className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white text-shadow-xl">Project Afronding</span>
+              <InlineTextEditor
+                value={displayTitle}
+                onSave={mainTitle.updateContent}
+                className="text-5xl md:text-7xl lg:text-8xl font-bold leading-tight text-white text-shadow-2xl"
+                multiline={true}
+                fieldName="Hoofdtitel"
+              />
             </h1>
           </ScrollReveal>
 
           {/* Enhanced Description */}
           <ScrollReveal delay={800}>
             <p className="text-xl md:text-2xl lg:text-3xl mb-10 text-white max-w-4xl mx-auto leading-relaxed text-shadow-lg">
-              Van nieuwbouw tot renovatie, crepi gevelafwerking tot ramen en deuren -
-              wij verzorgen complete bouwprojecten met vakmanschap en passie in Keerbergen, Mechelen, Leuven en omgeving.
+              <InlineTextEditor
+                value={displayDescription}
+                onSave={mainDescription.updateContent}
+                className="text-xl md:text-2xl lg:text-3xl text-white leading-relaxed text-shadow-lg"
+                multiline={true}
+                fieldName="Hoofdbeschrijving"
+              />
             </p>
           </ScrollReveal>
 

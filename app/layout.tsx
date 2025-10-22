@@ -9,6 +9,7 @@ import AnalyticsTracker from "@/components/analytics/AnalyticsTracker";
 import ServiceWorkerRegistration from "@/components/pwa/ServiceWorkerRegistration";
 import PWAInstallPrompt from "@/components/pwa/PWAInstallPrompt";
 import OfflinePage from "@/components/pwa/OfflinePage";
+import AdminToggle from "@/components/admin/AdminToggle";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -125,6 +126,7 @@ export default function RootLayout({
               <Chatbot />
               <PWAInstallPrompt />
               <OfflinePage />
+              <AdminToggle />
             </Providers>
           </body>
         </html>

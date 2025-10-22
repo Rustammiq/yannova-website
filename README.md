@@ -295,7 +295,7 @@ Dit project is eigendom van Yannova Bouw. Alle rechten voorbehouden.
 
 - **Website**: [yannova.nl](https://yannova.nl)
 - **Email**: info@yannova.nl
-- **Telefoon**: +31 6 12 34 56 78
+- **Telefoon**: +32 489960001
 
 ---
 

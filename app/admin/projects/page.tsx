@@ -164,7 +164,7 @@ export default function ProjectsPage() {
 
   if (status === "loading" || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-800">
         <Loader2 className="animate-spin text-yannova-primary" size={48} />
       </div>
     );
@@ -175,15 +175,15 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-800">
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-gray-900 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => router.push("/admin")}
-                className="flex items-center space-x-2 text-gray-600 hover:text-yannova-primary transition-colors"
+                className="flex items-center space-x-2 text-gray-300 hover:text-yannova-primary transition-colors"
               >
                 <ArrowLeft size={20} />
                 <span>Terug naar Dashboard</span>
@@ -195,7 +195,7 @@ export default function ProjectsPage() {
             </div>
             <button
               onClick={() => signOut({ callbackUrl: "/admin/login" })}
-              className="text-gray-600 hover:text-red-600 transition-colors"
+              className="text-gray-300 hover:text-red-600 transition-colors"
             >
               Uitloggen
             </button>
@@ -205,7 +205,7 @@ export default function ProjectsPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Controls */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="bg-gray-900 rounded-lg shadow-sm p-6 mb-6">
           <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
             <div className="flex flex-col sm:flex-row gap-4 flex-1">
               {/* Search */}
@@ -216,7 +216,7 @@ export default function ProjectsPage() {
                   placeholder="Zoek projecten..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary"
+                  className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary focus:border-yannova-primary text-white placeholder-gray-400"
                 />
               </div>
 
@@ -226,7 +226,7 @@ export default function ProjectsPage() {
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yannova-primary"
+                  className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yannova-primary focus:border-yannova-primary text-white"
                   title="Filter op project status"
                 >
                   <option value="all">Alle Status</option>
@@ -251,9 +251,9 @@ export default function ProjectsPage() {
         {/* Projects Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredProjects.map((project) => (
-            <div key={project.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div key={project.id} className="bg-gray-900 rounded-lg shadow-sm overflow-hidden">
               {/* Project Image */}
-              <div className="relative h-48 bg-gray-200">
+              <div className="relative h-48 bg-gray-700">
                 {project.images.length > 0 ? (
                   <Image
                     src={project.images[0]}
@@ -281,20 +281,20 @@ export default function ProjectsPage() {
 
               {/* Project Info */}
               <div className="p-4">
-                <h3 className="font-semibold text-gray-900 mb-2">{project.title}</h3>
-                <p className="text-sm text-gray-600 mb-3 line-clamp-2">{project.description}</p>
+                <h3 className="font-semibold text-white mb-2">{project.title}</h3>
+                <p className="text-sm text-gray-300 mb-3 line-clamp-2">{project.description}</p>
                 
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Locatie:</span>
+                    <span className="text-gray-400">Locatie:</span>
                     <span className="font-medium">{project.location}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Type:</span>
+                    <span className="text-gray-400">Type:</span>
                     <span className="font-medium">{project.type}</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-500">Budget:</span>
+                    <span className="text-gray-400">Budget:</span>
                     <span className="font-medium text-yannova-primary">{project.budget}</span>
                   </div>
                 </div>
@@ -324,8 +324,8 @@ export default function ProjectsPage() {
         {filteredProjects.length === 0 && (
           <div className="text-center py-12">
             <ImageIcon className="mx-auto text-gray-400" size={48} />
-            <h3 className="mt-4 text-lg font-medium text-gray-900">Geen projecten gevonden</h3>
-            <p className="mt-2 text-gray-600">Probeer je zoekterm aan te passen of voeg een nieuw project toe.</p>
+            <h3 className="mt-4 text-lg font-medium text-white">Geen projecten gevonden</h3>
+            <p className="mt-2 text-gray-300">Probeer je zoekterm aan te passen of voeg een nieuw project toe.</p>
           </div>
         )}
       </div>
@@ -333,40 +333,40 @@ export default function ProjectsPage() {
       {/* Add Project Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Nieuw Project Toevoegen</h2>
+          <div className="bg-gray-900 rounded-xl shadow-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-2xl font-bold text-white mb-6">Nieuw Project Toevoegen</h2>
             
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Titel</label>
+                  <label className="block text-sm font-medium text-gray-200 mb-2">Titel</label>
                   <input
                     type="text"
                     value={newProject.title}
                     onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary"
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary focus:border-yannova-primary text-white placeholder-gray-400"
                     placeholder="Project titel"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Locatie</label>
+                  <label className="block text-sm font-medium text-gray-200 mb-2">Locatie</label>
                   <input
                     type="text"
                     value={newProject.location}
                     onChange={(e) => setNewProject({ ...newProject, location: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary"
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary focus:border-yannova-primary text-white placeholder-gray-400"
                     placeholder="Keerbergen, Mechelen, etc."
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Beschrijving</label>
+                <label className="block text-sm font-medium text-gray-200 mb-2">Beschrijving</label>
                 <div className="flex space-x-2">
                   <textarea
                     value={newProject.description}
                     onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary"
+                    className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary focus:border-yannova-primary text-white placeholder-gray-400"
                     rows={3}
                     placeholder="Project beschrijving"
                   />
@@ -387,11 +387,11 @@ export default function ProjectsPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
+                  <label className="block text-sm font-medium text-gray-200 mb-2">Type</label>
                   <select
                     value={newProject.type}
                     onChange={(e) => setNewProject({ ...newProject, type: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary"
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary focus:border-yannova-primary text-white placeholder-gray-400"
                     title="Project type selecteren"
                   >
                     <option value="">Selecteer type</option>
@@ -403,11 +403,11 @@ export default function ProjectsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                  <label className="block text-sm font-medium text-gray-200 mb-2">Status</label>
                   <select
                     value={newProject.status}
                     onChange={(e) => setNewProject({ ...newProject, status: e.target.value as 'planning' | 'in-progress' | 'completed' })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary"
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary focus:border-yannova-primary text-white placeholder-gray-400"
                     title="Project status selecteren"
                   >
                     <option value="planning">Planning</option>
@@ -416,22 +416,22 @@ export default function ProjectsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Budget</label>
+                  <label className="block text-sm font-medium text-gray-200 mb-2">Budget</label>
                   <input
                     type="text"
                     value={newProject.budget}
                     onChange={(e) => setNewProject({ ...newProject, budget: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary"
+                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary focus:border-yannova-primary text-white placeholder-gray-400"
                     placeholder="€25.000"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Foto's Uploaden</label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                <label className="block text-sm font-medium text-gray-200 mb-2">Foto's Uploaden</label>
+                <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center">
                   <Upload className="mx-auto text-gray-400" size={48} />
-                  <p className="mt-2 text-sm text-gray-600">Sleep foto's hierheen of klik om te uploaden</p>
+                  <p className="mt-2 text-sm text-gray-300">Sleep foto's hierheen of klik om te uploaden</p>
                   <button className="mt-2 bg-yannova-primary text-white px-4 py-2 rounded-lg text-sm hover:bg-yannova-primary/90 transition-colors">
                     Foto's Selecteren
                   </button>
@@ -442,7 +442,7 @@ export default function ProjectsPage() {
             <div className="flex justify-end space-x-3 mt-6">
               <button
                 onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                className="px-4 py-2 text-gray-300 hover:text-gray-800 transition-colors"
               >
                 Annuleren
               </button>

@@ -7,8 +7,16 @@ import Chatbot from "@/components/chatbot/Chatbot";
 import Link from "next/link";
 import Image from "next/image";
 import { photoManager } from "@/lib/photoManager";
+import InlinePhotoEditor from "@/components/admin/InlinePhotoEditor";
+import { usePhotos } from "@/lib/usePhotos";
 
 export default function ProjectfotosPage() {
+  // Load photos for gallery
+  const { photos: galleryPhotos, updatePhotos: updateGalleryPhotos } = usePhotos({ 
+    category: 'gallery', 
+    limit: 16 
+  });
+
   const photoCategories = [
     {
       title: "Crepi Projecten",
@@ -340,28 +348,14 @@ export default function ProjectfotosPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-             {(() => {
-               // Get unique photos using PhotoManager
-               const uniquePhotos = photoManager.getUniquePhotos(16);
-               
-               // Add IDs to photos
-               return uniquePhotos.map((photo, index) => ({
-                 id: index + 1,
-                 ...photo
-               }));
-             })().map((photo) => (
-              <div key={photo.id} className="aspect-square rounded-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer shadow-lg">
-                <Image
-                  src={photo.src}
-                  alt={photo.alt}
-                  width={300}
-                  height={300}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ))}
-          </div>
+          <InlinePhotoEditor
+            photos={galleryPhotos}
+            onPhotosUpdate={updateGalleryPhotos}
+            maxPhotos={16}
+            category="gallery"
+            aspectRatio="aspect-square"
+            className="mb-8"
+          />
 
           <div className="text-center">
             <button

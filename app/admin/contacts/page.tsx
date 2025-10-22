@@ -6,14 +6,11 @@ import { useEffect, useState } from "react";
 import { signOut } from "next-auth/react";
 import {
   Mail,
-  Phone,
   Calendar,
   Search,
   Filter,
   ArrowLeft,
-  CheckCircle,
   Clock,
-  Star,
   Reply,
   Archive,
   Trash2,
@@ -59,7 +56,81 @@ export default function ContactsPage() {
   const loadContacts = async () => {
     setIsLoading(true);
     try {
-      // Mock data - in production zou dit van een API komen
+      const response = await fetch('/api/contacts', { cache: 'no-store' });
+      if (!response.ok) {
+        throw new Error('Failed to fetch contacts');
+      }
+      const data: ContactMessage[] = await response.json();
+      setContacts(Array.isArray(data) ? data : []);
+
+      // Fallback naar mock data als API niet werkt
+      if (!Array.isArray(data) || data.length === 0) {
+        const mockContacts: ContactMessage[] = [
+        {
+          id: "1",
+          name: "Jan De Vries",
+          email: "jan.devries@email.com",
+          phone: "+32 123 456 789",
+          subject: "Offerte badkamerrenovatie",
+          message: "Beste Yannova team, ik wil graag een offerte voor een complete badkamerrenovatie. Kunnen jullie langskomen voor een vrijblijvend gesprek? Het gaat om een badkamer van ongeveer 8m².",
+          status: "new",
+          priority: "high",
+          createdAt: "2024-02-15T10:30:00Z",
+          tags: ["badkamer", "renovatie", "offerte"]
+        },
+        {
+          id: "2",
+          name: "Marie Van der Berg",
+          email: "marie.vandenberg@email.com",
+          phone: "+32 987 654 321",
+          subject: "Tevreden klant - crepi gevelafwerking",
+          message: "Zeer tevreden met de crepi gevelafwerking! Kwaliteit is uitstekend en het team was professioneel. Bedankt voor het mooie werk.",
+          status: "replied",
+          priority: "low",
+          createdAt: "2024-02-10T14:20:00Z",
+          repliedAt: "2024-02-11T09:15:00Z",
+          tags: ["crepi", "tevreden", "referentie"]
+        },
+        {
+          id: "3",
+          name: "Peter Janssen",
+          email: "peter.janssen@email.com",
+          subject: "Vraag over nieuwbouw project",
+          message: "Ik ben geïnteresseerd in een nieuwbouw project in Keerbergen. Wat zijn jullie tarieven en hoe lang duurt een gemiddeld project?",
+          status: "read",
+          priority: "medium",
+          createdAt: "2024-02-12T16:45:00Z",
+          tags: ["nieuwbouw", "tarieven", "keerbergen"]
+        },
+        {
+          id: "4",
+          name: "Lisa Vermeulen",
+          email: "lisa.vermeulen@email.com",
+          phone: "+32 555 123 456",
+          subject: "Urgente reparatie",
+          message: "Er is een probleem met onze nieuwe ramen. Er komt tocht binnen en het lijkt alsof de montage niet goed is gedaan. Kunnen jullie zo snel mogelijk langskomen?",
+          status: "new",
+          priority: "high",
+          createdAt: "2024-02-14T08:15:00Z",
+          tags: ["ramen", "reparatie", "urgent"]
+        },
+        {
+          id: "5",
+          name: "Tom De Backer",
+          email: "tom.debacker@email.com",
+          subject: "Keukenrenovatie offerte",
+          message: "Ik wil graag een offerte voor een keukenrenovatie. Het gaat om een L-vormige keuken van ongeveer 12m². Wat zijn de mogelijkheden?",
+          status: "archived",
+          priority: "medium",
+          createdAt: "2024-02-05T11:30:00Z",
+          tags: ["keuken", "renovatie", "offerte"]
+        }
+      ];
+        setContacts(mockContacts);
+      }
+    } catch (error) {
+      console.error("Error loading contacts:", error);
+      // Fallback naar mock data als API niet werkt
       const mockContacts: ContactMessage[] = [
         {
           id: "1",
@@ -122,8 +193,6 @@ export default function ContactsPage() {
         }
       ];
       setContacts(mockContacts);
-    } catch (error) {
-      console.error("Error loading contacts:", error);
     } finally {
       setIsLoading(false);
     }
@@ -182,8 +251,8 @@ export default function ContactsPage() {
       case 'new': return 'bg-red-100 text-red-800';
       case 'read': return 'bg-blue-100 text-blue-800';
       case 'replied': return 'bg-green-100 text-green-800';
-      case 'archived': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'archived': return 'bg-gray-700 text-gray-200';
+      default: return 'bg-gray-700 text-gray-200';
     }
   };
 
@@ -192,7 +261,7 @@ export default function ContactsPage() {
       case 'high': return 'bg-red-100 text-red-800';
       case 'medium': return 'bg-yellow-100 text-yellow-800';
       case 'low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      default: return 'bg-gray-700 text-gray-200';
     }
   };
 
@@ -218,7 +287,7 @@ export default function ContactsPage() {
 
   if (status === "loading" || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-800">
         <div className="animate-spin text-yannova-primary text-4xl">Loading...</div>
       </div>
     );
@@ -229,15 +298,15 @@ export default function ContactsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-800">
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-gray-900 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => router.push("/admin")}
-                className="flex items-center space-x-2 text-gray-600 hover:text-yannova-primary transition-colors"
+                className="flex items-center space-x-2 text-gray-300 hover:text-yannova-primary transition-colors"
               >
                 <ArrowLeft size={20} />
                 <span>Terug naar Dashboard</span>
@@ -249,7 +318,7 @@ export default function ContactsPage() {
             </div>
             <button
               onClick={() => signOut({ callbackUrl: "/admin/login" })}
-              className="text-gray-600 hover:text-red-600 transition-colors"
+              className="text-gray-300 hover:text-red-600 transition-colors"
             >
               Uitloggen
             </button>
@@ -260,10 +329,10 @@ export default function ContactsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-gray-900 rounded-lg shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Nieuwe Berichten</p>
+                <p className="text-sm font-medium text-gray-300">Nieuwe Berichten</p>
                 <p className="text-3xl font-bold text-red-600">
                   {contacts.filter(c => c.status === 'new').length}
                 </p>
@@ -274,10 +343,10 @@ export default function ContactsPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-gray-900 rounded-lg shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Totaal Berichten</p>
+                <p className="text-sm font-medium text-gray-300">Totaal Berichten</p>
                 <p className="text-3xl font-bold text-blue-600">{contacts.length}</p>
               </div>
               <div className="bg-blue-100 p-3 rounded-full">
@@ -286,10 +355,10 @@ export default function ContactsPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-gray-900 rounded-lg shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Beantwoord</p>
+                <p className="text-sm font-medium text-gray-300">Beantwoord</p>
                 <p className="text-3xl font-bold text-green-600">
                   {contacts.filter(c => c.status === 'replied').length}
                 </p>
@@ -300,10 +369,10 @@ export default function ContactsPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-gray-900 rounded-lg shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Gemiddelde Reactietijd</p>
+                <p className="text-sm font-medium text-gray-300">Gemiddelde Reactietijd</p>
                 <p className="text-3xl font-bold text-purple-600">2.4h</p>
               </div>
               <div className="bg-purple-100 p-3 rounded-full">
@@ -314,7 +383,7 @@ export default function ContactsPage() {
         </div>
 
         {/* Controls */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="bg-gray-900 rounded-lg shadow-sm p-6 mb-6">
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
             <div className="flex flex-col sm:flex-row gap-4 flex-1">
               {/* Search */}
@@ -325,7 +394,7 @@ export default function ContactsPage() {
                   placeholder="Zoek berichten..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary"
+                  className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary focus:border-yannova-primary text-white placeholder-gray-400"
                 />
               </div>
 
@@ -335,7 +404,7 @@ export default function ContactsPage() {
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yannova-primary"
+                  className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yannova-primary focus:border-yannova-primary text-white"
                   title="Filter op bericht status"
                 >
                   <option value="all">Alle Status</option>
@@ -347,7 +416,7 @@ export default function ContactsPage() {
                 <select
                   value={filterPriority}
                   onChange={(e) => setFilterPriority(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yannova-primary"
+                  className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yannova-primary focus:border-yannova-primary text-white"
                   title="Filter op bericht prioriteit"
                 >
                   <option value="all">Alle Prioriteit</option>
@@ -370,7 +439,7 @@ export default function ContactsPage() {
                   </button>
                   <button
                     onClick={() => handleBulkAction('archive')}
-                    className="bg-gray-100 text-gray-800 px-3 py-2 rounded-lg text-sm hover:bg-gray-200 transition-colors"
+                    className="bg-gray-700 text-gray-200 px-3 py-2 rounded-lg text-sm hover:bg-gray-600 transition-colors"
                   >
                     Archiveer ({selectedContacts.length})
                   </button>
@@ -393,12 +462,12 @@ export default function ContactsPage() {
         </div>
 
         {/* Contacts List */}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="bg-gray-900 rounded-lg shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-800">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
                         <input
                           type="checkbox"
                           checked={selectedContacts.length === filteredContacts.length}
@@ -413,17 +482,17 @@ export default function ContactsPage() {
                           title="Selecteer alle berichten"
                         />
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Onderwerp</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prioriteit</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Datum</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acties</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Contact</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Onderwerp</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Prioriteit</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Datum</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Acties</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {filteredContacts.map((contact) => (
-                  <tr key={contact.id} className="hover:bg-gray-50">
+                  <tr key={contact.id} className="hover:bg-gray-800">
                     <td className="px-6 py-4">
                         <input
                           type="checkbox"
@@ -451,16 +520,16 @@ export default function ContactsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{contact.name}</div>
-                        <div className="text-sm text-gray-500">{contact.email}</div>
+                        <div className="text-sm font-medium text-white">{contact.name}</div>
+                        <div className="text-sm text-gray-400">{contact.email}</div>
                         {contact.phone && (
-                          <div className="text-sm text-gray-500">{contact.phone}</div>
+                          <div className="text-sm text-gray-400">{contact.phone}</div>
                         )}
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">{contact.subject}</div>
-                      <div className="text-sm text-gray-500 line-clamp-1">{contact.message}</div>
+                      <div className="text-sm font-medium text-white">{contact.subject}</div>
+                      <div className="text-sm text-gray-400 line-clamp-1">{contact.message}</div>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(contact.priority)}`}>
@@ -468,7 +537,7 @@ export default function ContactsPage() {
                          contact.priority === 'medium' ? 'Gemiddeld' : 'Laag'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">
+                    <td className="px-6 py-4 text-sm text-white">
                       {formatDate(contact.createdAt)}
                     </td>
                     <td className="px-6 py-4">
@@ -492,7 +561,7 @@ export default function ContactsPage() {
                         {contact.status !== 'archived' && (
                           <button
                             onClick={() => updateContactStatus(contact.id, 'archived')}
-                            className="text-gray-600 hover:text-gray-800"
+                            className="text-gray-300 hover:text-gray-800"
                             title="Archiveer"
                           >
                             <Archive size={16} />
@@ -510,8 +579,8 @@ export default function ContactsPage() {
         {filteredContacts.length === 0 && (
           <div className="text-center py-12">
             <Mail className="mx-auto text-gray-400" size={48} />
-            <h3 className="mt-4 text-lg font-medium text-gray-900">Geen berichten gevonden</h3>
-            <p className="mt-2 text-gray-600">Probeer je zoekterm of filters aan te passen.</p>
+            <h3 className="mt-4 text-lg font-medium text-white">Geen berichten gevonden</h3>
+            <p className="mt-2 text-gray-300">Probeer je zoekterm of filters aan te passen.</p>
           </div>
         )}
       </div>
@@ -519,12 +588,12 @@ export default function ContactsPage() {
       {/* Contact Detail Modal */}
       {viewingContact && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-gray-900 rounded-xl shadow-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-start mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Bericht Details</h2>
+              <h2 className="text-2xl font-bold text-white">Bericht Details</h2>
               <button
                 onClick={() => setViewingContact(null)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-300"
               >
                 ✕
               </button>
@@ -532,25 +601,25 @@ export default function ContactsPage() {
             
             <div className="space-y-6">
               {/* Contact Info */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="font-semibold text-gray-900 mb-3">Contact Informatie</h3>
+              <div className="bg-gray-800 rounded-lg p-4">
+                <h3 className="font-semibold text-white mb-3">Contact Informatie</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-gray-600">Naam</p>
+                    <p className="text-sm text-gray-300">Naam</p>
                     <p className="font-medium">{viewingContact.name}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600">Email</p>
+                    <p className="text-sm text-gray-300">Email</p>
                     <p className="font-medium">{viewingContact.email}</p>
                   </div>
                   {viewingContact.phone && (
                     <div>
-                      <p className="text-sm text-gray-600">Telefoon</p>
+                      <p className="text-sm text-gray-300">Telefoon</p>
                       <p className="font-medium">{viewingContact.phone}</p>
                     </div>
                   )}
                   <div>
-                    <p className="text-sm text-gray-600">Datum</p>
+                    <p className="text-sm text-gray-300">Datum</p>
                     <p className="font-medium">{formatDate(viewingContact.createdAt)}</p>
                   </div>
                 </div>
@@ -558,17 +627,17 @@ export default function ContactsPage() {
 
               {/* Message */}
               <div>
-                <h3 className="font-semibold text-gray-900 mb-3">Bericht</h3>
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900 mb-2">{viewingContact.subject}</h4>
-                  <p className="text-gray-700 whitespace-pre-wrap">{viewingContact.message}</p>
+                <h3 className="font-semibold text-white mb-3">Bericht</h3>
+                <div className="bg-gray-900 border border-gray-700 rounded-lg p-4">
+                  <h4 className="font-medium text-white mb-2">{viewingContact.subject}</h4>
+                  <p className="text-gray-200 whitespace-pre-wrap">{viewingContact.message}</p>
                 </div>
               </div>
 
               {/* Tags */}
               {viewingContact.tags.length > 0 && (
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">Tags</h3>
+                  <h3 className="font-semibold text-white mb-3">Tags</h3>
                   <div className="flex flex-wrap gap-2">
                     {viewingContact.tags.map((tag, index) => (
                       <span key={index} className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">
@@ -580,10 +649,10 @@ export default function ContactsPage() {
               )}
 
               {/* Actions */}
-              <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+              <div className="flex justify-end space-x-3 pt-6 border-t border-gray-700">
                 <button
                   onClick={() => setViewingContact(null)}
-                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                  className="px-4 py-2 text-gray-300 hover:text-gray-800 transition-colors"
                 >
                   Sluiten
                 </button>

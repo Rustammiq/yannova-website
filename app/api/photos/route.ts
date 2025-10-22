@@ -9,8 +9,10 @@ let photos = [
     id: "1",
     filename: "project-1-villa.jpg",
     url: "/images/projects/project-1-villa.jpg",
+    title: "Moderne Villa Nieuwbouw",
+    description: "Prachtig nieuwbouwproject van een moderne villa met strakke lijnen en hoogwaardige afwerking",
     alt: "Moderne villa nieuwbouw project",
-    category: "nieuwbouw",
+    category: "projects",
     tags: ["villa", "nieuwbouw", "modern", "keerbergen"],
     size: 2048000,
     dimensions: { width: 1920, height: 1080 },
@@ -19,23 +21,81 @@ let photos = [
     projectId: "1"
   },
   {
-    id: "2", 
+    id: "2",
     filename: "project-4-bathroom.jpg",
     url: "/images/projects/project-4-bathroom.jpg",
+    title: "Badkamer Renovatie",
+    description: "Complete badkamerrenovatie met moderne tegels en sanitair",
     alt: "Badkamer renovatie project",
-    category: "renovatie",
+    category: "projects",
     tags: ["badkamer", "renovatie", "tegels", "sanitair"],
     size: 1536000,
     dimensions: { width: 1600, height: 1200 },
     uploadedAt: "2024-02-10",
     aiGenerated: false,
     projectId: "2"
+  },
+  {
+    id: "3",
+    filename: "hero-construction.jpg",
+    url: "/images/hero-construction.jpg",
+    title: "Hero Afbeelding",
+    description: "Hoofdafbeelding voor de homepage",
+    alt: "Bouwproject in uitvoering",
+    category: "hero",
+    tags: ["hero", "bouw", "constructie"],
+    size: 1024000,
+    dimensions: { width: 1920, height: 1080 },
+    uploadedAt: "2024-01-01",
+    aiGenerated: false
+  },
+  {
+    id: "4",
+    filename: "logo-yannova.png",
+    url: "/images/logo-yannova.png",
+    title: "Yannova Logo",
+    description: "Bedrijfslogo van Yannova Bouw",
+    alt: "Yannova Bouw logo",
+    category: "hero",
+    tags: ["logo", "branding"],
+    size: 512000,
+    dimensions: { width: 600, height: 300 },
+    uploadedAt: "2024-01-01",
+    aiGenerated: false
+  },
+  {
+    id: "5",
+    filename: "gallery-nieuwbouw-1.jpg",
+    url: "/images/gallery/nieuwbouw-gallery/gallery-nieuwbouw-1.jpg",
+    title: "Nieuwbouw Galerij 1",
+    description: "Moderne nieuwbouw projecten",
+    alt: "Nieuwbouw project galerij",
+    category: "gallery",
+    tags: ["nieuwbouw", "galerij", "modern"],
+    size: 1536000,
+    dimensions: { width: 1600, height: 1200 },
+    uploadedAt: "2024-02-01",
+    aiGenerated: false
+  },
+  {
+    id: "6",
+    filename: "gallery-crepi-1.jpg",
+    url: "/images/gallery/crepi-gallery/gallery-crepi-1.jpg",
+    title: "Crepi Galerij 1",
+    description: "Crepi gevelafwerking projecten",
+    alt: "Crepi gevelafwerking galerij",
+    category: "gallery",
+    tags: ["crepi", "gevelafwerking", "galerij"],
+    size: 1536000,
+    dimensions: { width: 1600, height: 1200 },
+    uploadedAt: "2024-02-01",
+    aiGenerated: false
   }
 ];
 
 export async function GET() {
   try {
-    return NextResponse.json(photos);
+    return NextResponse.json({ photos });
   } catch (error) {
     console.error('Error fetching photos:', error);
     return NextResponse.json({ error: 'Failed to fetch photos' }, { status: 500 });
@@ -47,6 +107,8 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const category = formData.get('category') as string;
+    const title = formData.get('title') as string;
+    const description = formData.get('description') as string;
     const alt = formData.get('alt') as string;
     const tags = formData.get('tags') as string;
     const projectId = formData.get('projectId') as string;
@@ -77,6 +139,8 @@ export async function POST(request: NextRequest) {
       id: timestamp.toString(),
       filename: filename,
       url: `/images/uploads/${filename}`,
+      title: title || alt || file.name.split('.')[0],
+      description: description || '',
       alt: alt || file.name.split('.')[0],
       category: category || 'nieuwbouw',
       tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
@@ -116,18 +180,23 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
+    const { photoIds } = await request.json();
     
-    if (!id) {
-      return NextResponse.json({ error: 'Photo ID is required' }, { status: 400 });
+    if (!photoIds || !Array.isArray(photoIds) || photoIds.length === 0) {
+      return NextResponse.json({ error: 'Photo IDs are required' }, { status: 400 });
     }
     
-    photos = photos.filter(photo => photo.id !== id);
+    const deletedCount = photos.length;
+    photos = photos.filter(photo => !photoIds.includes(photo.id));
+    const actualDeletedCount = deletedCount - photos.length;
     
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ 
+      success: true, 
+      deletedCount: actualDeletedCount,
+      message: `${actualDeletedCount} foto(s) verwijderd`
+    });
   } catch (error) {
-    console.error('Error deleting photo:', error);
-    return NextResponse.json({ error: 'Failed to delete photo' }, { status: 500 });
+    console.error('Error deleting photos:', error);
+    return NextResponse.json({ error: 'Failed to delete photos' }, { status: 500 });
   }
 }

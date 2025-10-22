@@ -42,12 +42,13 @@ function SidebarNav() {
             </Link>
           );
         })}
-        <form action="/api/auth/signout" method="post">
-          <button type="submit" className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-300 hover:bg-gray-800 hover:text-white">
-            <LogOut className="w-4 h-4" />
-            <span>Uitloggen</span>
-          </button>
-        </form>
+        <button
+          onClick={() => window.location.href = '/api/auth/signout'}
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-300 hover:bg-gray-800 hover:text-white"
+        >
+          <LogOut className="w-4 h-4" />
+          <span>Uitloggen</span>
+        </button>
       </nav>
     </aside>
   );
