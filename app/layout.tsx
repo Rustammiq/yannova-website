@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -20,12 +20,6 @@ export const metadata: Metadata = {
     template: "%s | Yannova Bouw"
   },
   description: "Professionele bouwoplossingen van begin tot eind. Yannova Bouw realiseert uw droomproject met vakmanschap en passie. Nieuwbouw, verbouwingen en renovaties in Keerbergen, Mechelen, Putte, Bonheiden, Rijmenam en Leuven.",
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
   keywords: [
     "bouw", "renovatie", "nieuwbouw", "aannemer", "Yannova",
     "verbouwing", "dakwerken", "gevelbekleding", "badkamer renovatie", "keuken installatie",
@@ -101,6 +95,13 @@ export const metadata: Metadata = {
         'msapplication-config': '/browserconfig.xml',
         'theme-color': '#D4A574',
       },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
