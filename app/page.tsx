@@ -159,11 +159,11 @@ export default function HomePage() {
 
           {/* Enhanced Main Heading */}
           <ScrollReveal delay={600}>
-            <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-4 sm:mb-6 leading-tight text-white text-shadow-2xl px-4">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-4 sm:mb-6 leading-tight text-shadow-2xl px-4">
               <InlineTextEditor
                 value={displayTitle}
                 onSave={mainTitle.updateContent}
-                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold leading-tight text-white text-shadow-2xl"
+                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold leading-tight bg-gradient-to-r from-yannova-primary via-yannova-primaryLight to-yannova-primaryDark bg-clip-text text-transparent text-shadow-2xl"
                 multiline={true}
                 fieldName="Hoofdtitel"
               />
