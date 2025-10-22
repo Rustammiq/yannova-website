@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || "demo-key");
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,6 +14,15 @@ export async function POST(req: NextRequest) {
         { error: "Alle verplichte velden moeten worden ingevuld" },
         { status: 400 }
       );
+    }
+
+    // Check if we have a real API key
+    if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === "demo-key") {
+      console.log("Demo mode: Email not sent (no API key configured)");
+      return NextResponse.json({ 
+        success: true, 
+        message: "Demo mode: Bericht zou verzonden worden!" 
+      });
     }
 
     // Send email using Resend

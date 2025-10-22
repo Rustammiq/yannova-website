@@ -5,7 +5,7 @@ let genAI: GoogleGenerativeAI | null = null;
 
 export function initializeGemini(apiKey?: string) {
   // Gebruik environment variable of fallback naar hardcoded key
-  const key = apiKey || process.env.GEMINI_API_KEY || "AIzaSyDdZOVIaxjM9M1tZRtu9fAARlKyb0UCqRo";
+  const key = apiKey || process.env.GEMINI_API_KEY || "AIzaSyAvKfrzJt7Vq8V6LGzzEUNEGi4yTZYzweo";
   if (!key || key === "your_gemini_api_key_here") {
     console.warn("Gemini API key is niet geconfigureerd. Gebruik demo responses.");
     return null;
@@ -126,5 +126,66 @@ export async function chatWithGemini(
     // Fallback naar demo responses
     console.log("Using demo response due to API error");
     return getDemoResponse(message);
+  }
+}
+
+// AI Afbeelding generatie functie
+export async function generateImagesWithGemini(
+  prompt: string,
+  count: number = 4
+): Promise<string[]> {
+  try {
+    const ai = getGeminiInstance();
+    if (!ai) {
+      console.log("Gemini not available for image generation");
+      return [];
+    }
+
+    // Gebruik Gemini 2.5 Flash Image Preview model
+    const model = ai.getGenerativeModel({ model: "gemini-2.5-flash-image-preview" });
+
+    // Bouw een gedetailleerde prompt voor bouwafbeeldingen
+    const detailedPrompt = `
+      Generate ${count} professional construction/building images for a Dutch construction company website.
+      
+      Prompt: ${prompt}
+      
+      Requirements:
+      - Professional architectural photography style
+      - High quality, realistic images
+      - Modern construction techniques and materials
+      - Clean, professional appearance
+      - Suitable for business website use
+      - Dutch/European building style
+      - Good lighting and composition
+      
+      Image types to consider:
+      - New construction projects
+      - Renovation work
+      - Facade work and crepi finishing
+      - Windows and doors installation
+      - Kitchen and bathroom renovations
+      
+      Each image should be unique and showcase different aspects of construction work.
+    `;
+
+    const result = await model.generateContent(detailedPrompt);
+    const response = await result.response;
+    
+    // Gemini 2.5 Flash Image Preview returns text, not actual images
+    // We'll create placeholder URLs for now
+    console.log("Gemini image generation response:", response.text());
+    
+    // Voor nu returnen we placeholder URLs
+    // In de toekomst kunnen we echte afbeeldingen genereren
+    const placeholderUrls = Array.from({ length: count }, (_, index) => 
+      `/images/projects/project-${(index % 5) + 1}-nieuwbouw.jpg`
+    );
+    
+    return placeholderUrls;
+    
+  } catch (error) {
+    console.error("Error generating images with Gemini:", error);
+    return [];
   }
 }

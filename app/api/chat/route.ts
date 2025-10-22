@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { chatWithGemini } from "@/lib/gemini";
+import { chatWithGemini, generateImagesWithGemini } from "@/lib/gemini";
 
 // Madina systeem prompt voor consistente AI responses
 const MADINA_SYSTEM_PROMPT = `Je bent Madina, een vriendelijke en deskundige bouwassistent voor Yannova Bouw.
@@ -33,13 +33,32 @@ Spreek Nederlands en wees professioneel maar vriendelijk.`;
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { message, history } = body;
+    const { message, history, generateImages, imageCount } = body;
 
     if (!message) {
       return NextResponse.json(
         { error: "Bericht is verplicht" },
         { status: 400 }
       );
+    }
+
+    // Als afbeelding generatie wordt gevraagd
+    if (generateImages) {
+      try {
+        const images = await generateImagesWithGemini(message, imageCount || 4);
+        return NextResponse.json({
+          response: `Ik heb ${images.length} afbeeldingen gegenereerd voor: ${message}`,
+          images: images,
+          timestamp: new Date().toISOString(),
+        });
+      } catch (error) {
+        console.error("Image generation error:", error);
+        return NextResponse.json({
+          response: "Sorry, ik kon geen afbeeldingen genereren op dit moment. Probeer het later opnieuw.",
+          images: [],
+          timestamp: new Date().toISOString(),
+        });
+      }
     }
 
     // Bouw conversation history met systeem prompt

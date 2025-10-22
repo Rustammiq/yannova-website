@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     console.error("Admin API error:", error);
     const errorMessage = error instanceof Error ? error.message : "Er ging iets mis";
     return NextResponse.json(
-      { error: error.message || "Er ging iets mis" },
+      { error: errorMessage },
       { status: 500 }
     );
   }

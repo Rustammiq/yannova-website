@@ -4,6 +4,11 @@ import "./globals.css";
 import { Providers } from "./providers";
 import StructuredData from "@/components/StructuredData";
 import Chatbot from "@/components/chatbot/Chatbot";
+import GoogleAnalytics from "@/components/analytics/GoogleAnalytics";
+import AnalyticsTracker from "@/components/analytics/AnalyticsTracker";
+import ServiceWorkerRegistration from "@/components/pwa/ServiceWorkerRegistration";
+import PWAInstallPrompt from "@/components/pwa/PWAInstallPrompt";
+import OfflinePage from "@/components/pwa/OfflinePage";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -99,11 +104,27 @@ export default function RootLayout({
         <html lang="nl">
           <head>
             <StructuredData />
+            {/* No-JS fallback script */}
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  document.documentElement.classList.add('no-js');
+                  document.addEventListener('DOMContentLoaded', function() {
+                    document.documentElement.classList.remove('no-js');
+                  });
+                `,
+              }}
+            />
           </head>
           <body className={inter.className}>
+            <GoogleAnalytics />
+            <AnalyticsTracker />
+            <ServiceWorkerRegistration />
             <Providers>
               {children}
               <Chatbot />
+              <PWAInstallPrompt />
+              <OfflinePage />
             </Providers>
           </body>
         </html>

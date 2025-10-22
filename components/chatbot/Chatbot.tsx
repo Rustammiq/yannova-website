@@ -3,11 +3,20 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { FileText, Euro } from "lucide-react";
 import { chatWithGemini } from "@/lib/gemini";
+import {
+  getServiceInfo,
+  getTermDefinition,
+  estimateCost,
+  generateFollowUpQuestions,
+  generatePriceEstimate,
+  BUILDING_TERMS
+} from "@/lib/buildingKnowledge";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
   type?: "text" | "offerte_form";
+  suggestions?: string[];
 }
 
 interface OfferteAanvraag {
@@ -66,7 +75,13 @@ export default function Chatbot() {
     {
       role: "assistant",
       content:
-        "Hey! Ik ben Yannick van Yannova Bouw. Ik zie dat je op onze site bent - perfect! Ik help je graag met je bouwproject. Wat heb je in gedachten?",
+        "Hey! Ik ben Yannick van Yannova Bouw. 👋 Ik werk al 15 jaar in de bouw en heb al heel wat projecten gezien. Ik zie dat je op onze site bent - perfect! Ik help je graag met je bouwproject.\n\nWat heb je in gedachten? Een renovatie, nieuwbouw, crepi gevel, of iets met ramen en deuren?",
+      suggestions: [
+        "Hoeveel kost crepi ongeveer?",
+        "Ik wil mijn badkamer renoveren",
+        "Offert aanvragen voor nieuwbouw",
+        "Wat zijn jullie werkgebieden?"
+      ]
     },
   ]);
   const [input, setInput] = useState("");
@@ -121,55 +136,75 @@ export default function Chatbot() {
     }, 500);
   }, []);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
-
-    const userMessage: Message = { role: "user", content: input };
-    setMessages((prev) => [...prev, userMessage]);
-    const currentInput = input;
-    setInput("");
+  const processMessage = useCallback(async (currentInput: string) => {
     setIsLoading(true);
 
-    // Check if user wants an offerte
-    const offerteKeywords = ['offerte', 'prijs', 'kost', 'budget', 'prijsofferte', 'kostprijs', 'schatting'];
-    const wantsOfferte = offerteKeywords.some(keyword => 
-      currentInput.toLowerCase().includes(keyword)
-    );
-
-    if (wantsOfferte) {
-      setIsLoading(false);
-      setShowOfferteForm(true);
-      const offerteMessage: Message = {
-        role: "assistant",
-        content: "Ah, je wilt een offerte! Perfect, dat kan ik voor je regelen. Ik heb wat informatie nodig om een goede prijs te kunnen maken. Vul het formulier hieronder in en ik geef je een eerlijke schatting.",
-        type: "offerte_form"
-      };
-      setMessages((prev) => [...prev, offerteMessage]);
-      return;
-    }
-
     try {
-      // Bouw conversation history voor context
-      const conversationHistory = messages.map((msg) => ({
+      // Bouw conversation history voor context (including the new user message)
+      const conversationHistory = [...messages, { role: "user" as const, content: currentInput }].map((msg) => ({
         role: msg.role,
         content: msg.content,
       }));
+
+      // Enhanced response met bouwkennis
+      let enhancedResponse = "";
+
+      // Check voor bouwtermen en geef definities
+      const lowerInput = currentInput.toLowerCase();
+      const foundTerms = Object.keys(BUILDING_TERMS).filter(term =>
+        lowerInput.includes(term)
+      );
+
+      if (foundTerms.length > 0) {
+        enhancedResponse += `Eerst even uitleggen wat ${foundTerms[0]} is: ${getTermDefinition(foundTerms[0])}\n\n`;
+      }
+
+      // Check voor services en geef specifieke info
+      const serviceKeywords = ['crepi', 'ramen', 'deuren', 'nieuwbouw', 'renovatie'];
+      const detectedService = serviceKeywords.find(service =>
+        lowerInput.includes(service)
+      );
+
+      if (detectedService) {
+        const serviceInfo = getServiceInfo(detectedService);
+        if (serviceInfo) {
+          enhancedResponse += `Voor ${serviceInfo.name} kan ik je vertellen dat het gemiddeld ${serviceInfo.averageCost} kost en ${serviceInfo.duration} duurt. `;
+          enhancedResponse += `Belangrijkste punten: ${serviceInfo.keyFeatures.slice(0, 2).join(', ')}.\n\n`;
+        }
+      }
+
+      // Check voor kosten vragen
+      if (lowerInput.includes('kost') || lowerInput.includes('prijs') || lowerInput.includes('budget')) {
+        const costKeywords = ['crepi', 'ramen', 'nieuwbouw', 'renovatie'];
+        const detectedCostService = costKeywords.find(service =>
+          lowerInput.includes(service)
+        );
+
+        if (detectedCostService) {
+          enhancedResponse += `Voor ${detectedCostService} liggen de kosten tussen ${estimateCost(`${detectedCostService}-per-m2`)}.\n\n`;
+        }
+      }
 
       // Voeg systeem prompt toe aan het begin
       const fullHistory = [
         { role: "user", content: YANNICK_SYSTEM_PROMPT },
         { role: "model", content: "Begrepen! Ik ben Yannick, klaar om te helpen met bouwvragen en meer!" },
-        ...conversationHistory,
-        { role: "user", content: currentInput }
+        ...conversationHistory
       ];
 
       // Haal AI response op
       const response = await chatWithGemini(currentInput, fullHistory);
 
+      // Combine enhanced response met AI response
+      enhancedResponse += response;
+
+      // Add suggestions based on user input
+      const suggestions = generateFollowUpQuestions(currentInput, detectedService || '');
+
       const assistantMessage: Message = {
         role: "assistant",
-        content: response,
+        content: enhancedResponse,
+        suggestions: suggestions.slice(0, 3) // Max 3 suggestions
       };
       setMessages((prev) => [...prev, assistantMessage]);
 
@@ -183,8 +218,38 @@ export default function Chatbot() {
     } finally {
       setIsLoading(false);
     }
+  }, [messages]);
 
-  }, [input, isLoading, messages]);
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+
+    const userMessage: Message = { role: "user", content: input };
+    setMessages((prev) => [...prev, userMessage]);
+    const currentInput = input;
+    setInput("");
+
+    // Check if user wants an offerte
+    const offerteKeywords = ['offerte', 'prijs', 'kost', 'budget', 'prijsofferte', 'kostprijs', 'schatting'];
+    const wantsOfferte = offerteKeywords.some(keyword =>
+      currentInput.toLowerCase().includes(keyword)
+    );
+
+    if (wantsOfferte) {
+      setShowOfferteForm(true);
+      const offerteMessage: Message = {
+        role: "assistant",
+        content: "Ah, je wilt een offerte! Perfect, dat kan ik voor je regelen. Ik heb wat informatie nodig om een goede prijs te kunnen maken. Vul het formulier hieronder in en ik geef je een eerlijke schatting.",
+        type: "offerte_form"
+      };
+      setMessages((prev) => [...prev, offerteMessage]);
+      return;
+    }
+
+    // Process message with AI and building knowledge
+    await processMessage(currentInput);
+
+  }, [input, isLoading, processMessage]);
 
   const handleOfferteSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -255,6 +320,32 @@ Bedankt voor je vertrouwen! Ik kijk ernaar uit om je project te realiseren.`;
       }));
     }
   }, []);
+
+  const handleSuggestionClick = useCallback((suggestion: string) => {
+    // Add user message
+    const userMessage: Message = { role: "user", content: suggestion };
+    setMessages((prev) => [...prev, userMessage]);
+
+    // Check if user wants an offerte
+    const offerteKeywords = ['offerte', 'prijs', 'kost', 'budget', 'prijsofferte', 'kostprijs', 'schatting'];
+    const wantsOfferte = offerteKeywords.some(keyword =>
+      suggestion.toLowerCase().includes(keyword)
+    );
+
+    if (wantsOfferte) {
+      setShowOfferteForm(true);
+      const offerteMessage: Message = {
+        role: "assistant",
+        content: "Ah, je wilt een offerte! Perfect, dat kan ik voor je regelen. Ik heb wat informatie nodig om een goede prijs te kunnen maken. Vul het formulier hieronder in en ik geef je een eerlijke schatting.",
+        type: "offerte_form"
+      };
+      setMessages((prev) => [...prev, offerteMessage]);
+      return;
+    }
+
+    // Process with AI and building knowledge
+    processMessage(suggestion);
+  }, [processMessage]);
 
   return (
     <>
@@ -401,6 +492,21 @@ Bedankt voor je vertrouwen! Ik kijk ernaar uit om je project te realiseren.`;
                   }`}
                 >
                   <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+
+                  {/* Suggestion buttons for assistant messages */}
+                  {message.role === "assistant" && message.suggestions && message.suggestions.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {message.suggestions.map((suggestion, suggestionIndex) => (
+                        <button
+                          key={suggestionIndex}
+                          onClick={() => handleSuggestionClick(suggestion)}
+                          className="text-xs bg-white text-gray-700 border border-gray-300 rounded-full px-3 py-1 hover:bg-gray-50 hover:border-yannova-primary transition-all duration-200 hover:scale-105"
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

@@ -20,6 +20,7 @@ import {
   List,
   Folder,
 } from "lucide-react";
+import { useToast } from "@/components/ui/Toaster";
 
 interface Photo {
   id: string;
@@ -32,6 +33,7 @@ interface Photo {
   dimensions: { width: number; height: number };
   uploadedAt: string;
   aiGenerated: boolean;
+  projectId?: string;
 }
 
 interface Category {
@@ -55,6 +57,12 @@ export default function PhotosPage() {
   const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [uploadFiles, setUploadFiles] = useState<FileList | null>(null);
+  const [editingPhoto, setEditingPhoto] = useState<Photo | null>(null);
+  const [uploadCategory, setUploadCategory] = useState<string>("nieuwbouw");
+  const [uploadProjectId, setUploadProjectId] = useState<string>("");
+  const [dragOver, setDragOver] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState<string>("");
+  const { show } = useToast();
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -70,7 +78,15 @@ export default function PhotosPage() {
   const loadPhotos = async () => {
     setIsLoading(true);
     try {
-      // Simulated data
+      const response = await fetch('/api/photos', { cache: 'no-store' });
+      if (!response.ok) {
+        throw new Error('Failed to fetch photos');
+      }
+      const data: Photo[] = await response.json();
+      setPhotos(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Error loading photos:", error);
+      // Fallback naar mock data als API niet werkt
       const mockPhotos: Photo[] = [
         {
           id: "1",
@@ -96,34 +112,8 @@ export default function PhotosPage() {
           uploadedAt: "2024-02-10",
           aiGenerated: false,
         },
-        {
-          id: "3",
-          filename: "project-7-crepi.jpg",
-          url: "/images/projects/project-7-crepi.jpg",
-          alt: "Crepi gevelafwerking",
-          category: "gevelwerk",
-          tags: ["crepi", "gevel", "isolatie", "putte"],
-          size: 1280000,
-          dimensions: { width: 1400, height: 900 },
-          uploadedAt: "2024-02-08",
-          aiGenerated: false,
-        },
-        {
-          id: "4",
-          filename: "ai-generated-construction.jpg",
-          url: "/images/ai-generated-construction.jpg",
-          alt: "AI gegenereerde bouwafbeelding",
-          category: "ai-generated",
-          tags: ["ai", "bouw", "modern", "generated"],
-          size: 1024000,
-          dimensions: { width: 1200, height: 800 },
-          uploadedAt: "2024-02-20",
-          aiGenerated: true,
-        },
       ];
       setPhotos(mockPhotos);
-    } catch (error) {
-      console.error("Error loading photos:", error);
     } finally {
       setIsLoading(false);
     }
@@ -144,59 +134,194 @@ export default function PhotosPage() {
     }
   };
 
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragOver(false);
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      setUploadFiles(files);
+      setShowUploadModal(true);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setUploadFiles(e.target.files);
+    }
+  };
+
   const handleUpload = async () => {
     if (!uploadFiles) return;
     
     setIsUploading(true);
     try {
-      // Simulate upload
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const uploadPromises = Array.from(uploadFiles).map(async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('category', uploadCategory);
+        formData.append('alt', file.name.split('.')[0]);
+        formData.append('tags', 'uploaded,admin');
+        if (uploadProjectId) {
+          formData.append('projectId', uploadProjectId);
+        }
+        
+        const response = await fetch('/api/photos', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to upload ${file.name}`);
+        }
+        
+        return response.json();
+      });
       
-      const newPhotos: Photo[] = Array.from(uploadFiles).map((file, index) => ({
-        id: Date.now().toString() + index,
-        filename: file.name,
-        url: URL.createObjectURL(file),
-        alt: file.name.split('.')[0],
-        category: "nieuwbouw",
-        tags: [],
-        size: file.size,
-        dimensions: { width: 1920, height: 1080 },
-        uploadedAt: new Date().toISOString().split('T')[0],
-        aiGenerated: false,
-      }));
-      
-      setPhotos([...newPhotos, ...photos]);
+      const uploadedPhotos = await Promise.all(uploadPromises);
+      setPhotos([...uploadedPhotos, ...photos]);
       setUploadFiles(null);
+      setUploadCategory("nieuwbouw");
+      setUploadProjectId("");
       setShowUploadModal(false);
+      
+      // Reload photos om zeker te zijn dat alles gesynchroniseerd is
+      await loadPhotos();
+      
     } catch (error) {
       console.error("Error uploading photos:", error);
+      show({ type: "error", title: "Upload mislukt", message: "Er ging iets mis. Probeer opnieuw." });
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const assignPhotoToProject = async (photoId: string, projectId: string) => {
+    try {
+      const response = await fetch('/api/photos', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ id: photoId, projectId }),
+      });
+
+      if (!response.ok) throw new Error('Failed to assign photo to project');
+
+      setPhotos(prev => prev.map(photo => photo.id === photoId ? { ...photo, projectId } : photo));
+      await updateProjectImages(projectId, photoId);
+    } catch (error) {
+      console.error("Error assigning photo to project:", error);
+      show({ type: "error", title: "Koppelen mislukt", message: "Foto kon niet aan project gekoppeld worden." });
+    }
+  };
+
+  const updateProjectImages = async (projectId: string, photoId: string) => {
+    try {
+      const photo = photos.find(p => p.id === photoId);
+      if (!photo) return;
+
+      const projectResponse = await fetch('/api/projects', { cache: 'no-store' });
+      if (!projectResponse.ok) return;
+      const projects = await projectResponse.json();
+      const project = projects.find((p: any) => p.id === projectId);
+
+      if (project) {
+        const images = Array.isArray(project.images) ? project.images : [];
+        const updatedImages = images.includes(photo.url) ? images : [...images, photo.url];
+
+        await fetch('/api/projects', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ id: projectId, images: updatedImages }),
+        });
+      }
+    } catch (error) {
+      console.error("Error updating project images:", error);
     }
   };
 
   const generateAIPhotos = async (prompt: string, count: number = 4) => {
     setIsGenerating(true);
     try {
-      // Simulate AI generation
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Gebruik de nieuwe Gemini API voor afbeelding generatie
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: prompt,
+          generateImages: true,
+          imageCount: count
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('AI generation response:', result);
+        
+        // Als AI generatie succesvol is, voeg foto's toe
+        if (result.images && result.images.length > 0) {
+          const aiPhotos: Photo[] = result.images.map((imageUrl: string, index: number) => ({
+            id: `ai-${Date.now()}-${index}`,
+            filename: `ai-generated-${index + 1}.jpg`,
+            url: imageUrl,
+            alt: `AI gegenereerde afbeelding: ${prompt}`,
+            category: uploadCategory || "ai-generated",
+            tags: ["ai", "generated", prompt.toLowerCase()],
+            size: 1024000,
+            dimensions: { width: 1200, height: 800 },
+            uploadedAt: new Date().toISOString().split('T')[0],
+            aiGenerated: true,
+            projectId: uploadProjectId || undefined
+          }));
+          
+          setPhotos([...aiPhotos, ...photos]);
+          show({ type: "success", title: "AI gegenereerd", message: `${aiPhotos.length} afbeeldingen toegevoegd.` });
+        } else {
+          throw new Error('Geen afbeeldingen gegenereerd');
+        }
+      } else {
+        throw new Error('AI generatie API niet beschikbaar');
+      }
+    } catch (error) {
+      console.error("Error generating AI photos:", error);
+      show({ type: "error", title: "AI generatie niet beschikbaar", message: "Er worden placeholders toegevoegd." });
+
+      // Fallback naar placeholder generatie
+      console.log("Fallback naar placeholder generatie...");
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
       const aiPhotos: Photo[] = Array.from({ length: count }, (_, index) => ({
         id: `ai-${Date.now()}-${index}`,
-        filename: `ai-generated-${index + 1}.jpg`,
-        url: `/images/ai-generated-${index + 1}.jpg`,
+        filename: `ai-placeholder-${index + 1}.jpg`,
+        url: `/images/projects/project-${(index % 5) + 1}-${uploadCategory || 'nieuwbouw'}.jpg`, // Gebruik bestaande afbeeldingen als placeholder
         alt: `AI gegenereerde afbeelding: ${prompt}`,
-        category: "ai-generated",
+        category: uploadCategory || "ai-generated",
         tags: ["ai", "generated", prompt.toLowerCase()],
         size: 1024000,
         dimensions: { width: 1200, height: 800 },
         uploadedAt: new Date().toISOString().split('T')[0],
         aiGenerated: true,
+        projectId: uploadProjectId || undefined
       }));
       
       setPhotos([...aiPhotos, ...photos]);
-    } catch (error) {
-      console.error("Error generating AI photos:", error);
+      show({ type: "info", title: "Placeholders toegevoegd", message: `${aiPhotos.length} afbeeldingen toegevoegd.` });
     } finally {
       setIsGenerating(false);
     }
@@ -205,6 +330,7 @@ export default function PhotosPage() {
   const handleDeletePhoto = async (id: string) => {
     if (confirm("Weet je zeker dat je deze foto wilt verwijderen?")) {
       setPhotos(photos.filter(p => p.id !== id));
+      show({ type: "success", title: "Foto verwijderd", message: "De foto is verwijderd." });
     }
   };
 
@@ -212,6 +338,7 @@ export default function PhotosPage() {
     if (confirm(`Weet je zeker dat je ${selectedPhotos.length} foto's wilt verwijderen?`)) {
       setPhotos(photos.filter(p => !selectedPhotos.includes(p.id)));
       setSelectedPhotos([]);
+      show({ type: "success", title: "Verwijderd", message: `${selectedPhotos.length} foto's verwijderd.` });
     }
   };
 
@@ -231,6 +358,53 @@ export default function PhotosPage() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
+  const handleExport = async (format: 'csv' | 'json') => {
+    try {
+      const exportData = photos.map(photo => ({
+        id: photo.id,
+        filename: photo.filename,
+        url: photo.url,
+        alt: photo.alt,
+        category: photo.category,
+        tags: photo.tags.join(', '),
+        size: photo.size,
+        dimensions: `${photo.dimensions.width}x${photo.dimensions.height}`,
+        uploadedAt: photo.uploadedAt,
+        aiGenerated: photo.aiGenerated,
+        projectId: photo.projectId || 'Geen project'
+      }));
+
+      let content: string;
+      let filename: string;
+      let mimeType: string;
+
+      if (format === 'csv') {
+        const headers = Object.keys(exportData[0]).join(',');
+        const rows = exportData.map(row => Object.values(row).map(value => `"${value}"`).join(','));
+        content = [headers, ...rows].join('\n');
+        filename = `fotos-export-${new Date().toISOString().split('T')[0]}.csv`;
+        mimeType = 'text/csv';
+      } else {
+        content = JSON.stringify(exportData, null, 2);
+        filename = `fotos-export-${new Date().toISOString().split('T')[0]}.json`;
+        mimeType = 'application/json';
+      }
+
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error exporting photos:", error);
+      show({ type: "error", title: "Export mislukt", message: "Kon geen exportbestand genereren." });
+    }
+  };
+
   if (status === "loading" || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -245,34 +419,11 @@ export default function PhotosPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => router.push("/admin")}
-                className="flex items-center space-x-2 text-gray-600 hover:text-yannova-primary transition-colors"
-              >
-                <ArrowLeft size={20} />
-                <span>Terug naar Dashboard</span>
-              </button>
-              <span className="text-gray-400">|</span>
-              <h1 className="text-2xl font-bold text-yannova-primary">
-                Foto Management
-              </h1>
-            </div>
-            <button
-              onClick={() => signOut({ callbackUrl: "/admin/login" })}
-              className="text-gray-600 hover:text-red-600 transition-colors"
-            >
-              Uitloggen
-            </button>
-          </div>
-        </div>
-      </header>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Foto Management</h1>
+          <p className="text-sm text-gray-600">Upload, beheer en koppel foto’s aan projecten.</p>
+        </div>
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow-sm p-6">
@@ -393,6 +544,32 @@ export default function PhotosPage() {
                 </button>
               )}
 
+              {/* Export Dropdown */}
+              <div className="relative">
+                <details className="group">
+                  <summary className="list-none">
+                    <button className="bg-gray-100 text-gray-800 px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-gray-200 transition-colors">
+                      <Download size={20} />
+                      <span>Export</span>
+                    </button>
+                  </summary>
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                    <button
+                      onClick={() => handleExport('csv')}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-t-lg"
+                    >
+                      Export als CSV
+                    </button>
+                    <button
+                      onClick={() => handleExport('json')}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-lg"
+                    >
+                      Export als JSON
+                    </button>
+                  </div>
+                </details>
+              </div>
+
               {/* Upload Button */}
               <button
                 onClick={() => setShowUploadModal(true)}
@@ -427,7 +604,16 @@ export default function PhotosPage() {
 
         {/* Photos Grid/List */}
         {viewMode === "grid" ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          <div 
+            className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 p-6 rounded-lg border-2 border-dashed transition-colors ${
+              dragOver 
+                ? 'border-yannova-primary bg-yannova-primary/5' 
+                : 'border-gray-300 hover:border-gray-400'
+            }`}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
             {filteredPhotos.map((photo) => (
               <div key={photo.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
                 <div className="relative aspect-square">
@@ -475,6 +661,31 @@ export default function PhotosPage() {
                       <span className="text-gray-500 text-xs">+{photo.tags.length - 2}</span>
                     )}
                   </div>
+                  
+                  {/* Project Assignment */}
+                  <div className="mt-3 pt-2 border-t border-gray-100">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-gray-600">Project:</span>
+                      <select
+                        value={photo.projectId || ''}
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            assignPhotoToProject(photo.id, e.target.value);
+                          }
+                        }}
+                        className="text-xs border border-gray-300 rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-yannova-primary"
+                        title="Selecteer project voor deze foto"
+                      >
+                        <option value="">Geen project</option>
+                        <option value="1">Moderne Villa Keerbergen</option>
+                        <option value="2">Badkamer Renovatie Mechelen</option>
+                        <option value="3">Crepi Gevelafwerking Putte</option>
+                        <option value="4">Ramen en Deuren Renovatie</option>
+                        <option value="5">Keuken Renovatie Project</option>
+                      </select>
+                    </div>
+                  </div>
+                  
                   <div className="flex space-x-1 mt-2">
                   <button
                     onClick={() => setEditingPhoto(photo)}
@@ -630,18 +841,74 @@ export default function PhotosPage() {
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Selecteer Foto's</label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                <div 
+                  className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                    dragOver 
+                      ? 'border-yannova-primary bg-yannova-primary/5' 
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
                   <Upload className="mx-auto text-gray-400" size={48} />
                   <p className="mt-2 text-sm text-gray-600">Sleep foto's hierheen of klik om te selecteren</p>
                   <input
                     type="file"
                     multiple
                     accept="image/*"
-                    onChange={(e) => setUploadFiles(e.target.files)}
+                    onChange={handleFileSelect}
                     className="mt-4"
                     title="Selecteer foto's om te uploaden"
                   />
+                  {uploadFiles && (
+                    <div className="mt-4">
+                      <p className="text-sm text-gray-600">
+                        {uploadFiles.length} foto(s) geselecteerd
+                      </p>
+                      <div className="mt-2 space-y-1">
+                        {Array.from(uploadFiles).map((file, index) => (
+                          <p key={index} className="text-xs text-gray-500">
+                            {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Categorie</label>
+                <select
+                  value={uploadCategory}
+                  onChange={(e) => setUploadCategory(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary"
+                  title="Selecteer categorie voor de foto's"
+                >
+                  <option value="nieuwbouw">Nieuwbouw</option>
+                  <option value="renovatie">Renovatie</option>
+                  <option value="gevelwerk">Gevelwerk</option>
+                  <option value="ramen-deuren">Ramen & Deuren</option>
+                  <option value="verbouwing">Verbouwing</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Koppel aan Project (optioneel)</label>
+                <select
+                  value={uploadProjectId}
+                  onChange={(e) => setUploadProjectId(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary"
+                  title="Selecteer project om foto's aan te koppelen"
+                >
+                  <option value="">Geen project</option>
+                  <option value="1">Moderne Villa Keerbergen</option>
+                  <option value="2">Badkamer Renovatie Mechelen</option>
+                  <option value="3">Crepi Gevelafwerking Putte</option>
+                  <option value="4">Ramen en Deuren Renovatie</option>
+                  <option value="5">Keuken Renovatie Project</option>
+                </select>
               </div>
 
               <div>
@@ -649,12 +916,14 @@ export default function PhotosPage() {
                 <div className="flex space-x-2">
                   <input
                     type="text"
+                    value={aiPrompt}
+                    onChange={(e) => setAiPrompt(e.target.value)}
                     placeholder="Beschrijf de foto's die je wilt genereren..."
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yannova-primary"
                     title="Beschrijf de foto's die je wilt genereren"
                   />
                   <button
-                    onClick={() => generateAIPhotos("moderne bouw project")}
+                    onClick={() => generateAIPhotos(aiPrompt || "moderne bouw project")}
                     disabled={isGenerating}
                     className="bg-purple-100 text-purple-800 px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-purple-200 transition-colors disabled:opacity-50"
                   >

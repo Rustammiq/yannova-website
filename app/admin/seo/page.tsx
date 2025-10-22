@@ -174,7 +174,7 @@ export default function SEOPage() {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       if (editingPage) {
-        setSeoData(seoData.map(item => 
+        setSeoData(prevSeoData => prevSeoData.map(item => 
           item.id === editingPage.id 
             ? { ...editingPage, lastUpdated: new Date().toISOString().split('T')[0] }
             : item
@@ -188,7 +188,7 @@ export default function SEOPage() {
           score: Math.floor(Math.random() * 20) + 70, // Random score 70-90
           lastUpdated: new Date().toISOString().split('T')[0],
         };
-        setSeoData([newSEOData, ...seoData]);
+        setSeoData(prevSeoData => [newSEOData, ...prevSeoData]);
         setNewSEO({
           page: "",
           title: "",
@@ -519,7 +519,20 @@ export default function SEOPage() {
                 Annuleren
               </button>
               <button
-                onClick={() => handleSaveSEO(seoData)}
+                onClick={() => {
+                  if (editingPage) {
+                    handleSaveSEO(editingPage);
+                  } else {
+                    const newSEOData: SEOData = {
+                      id: Date.now().toString(),
+                      ...newSEO,
+                      keywords: newSEO.keywords.split(",").map(k => k.trim()),
+                      score: Math.floor(Math.random() * 20) + 70,
+                      lastUpdated: new Date().toISOString().split('T')[0],
+                    };
+                    handleSaveSEO(newSEOData);
+                  }
+                }}
                 className="bg-yannova-primary text-white px-6 py-2 rounded-lg flex items-center space-x-2 hover:bg-yannova-primary/90 transition-colors"
               >
                 <Save size={20} />

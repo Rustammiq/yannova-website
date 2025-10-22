@@ -2,31 +2,78 @@
 
 import Navigation from "@/components/ui/Navigation";
 import Footer from "@/components/ui/Footer";
+import dynamic from "next/dynamic";
+const ParticleSystem = dynamic(() => import("@/components/ui/ParticleSystem"), { ssr: false });
+import ScrollReveal from "@/components/ui/ScrollReveal";
+import LazyLoad from "@/components/ui/LazyLoad";
+import Preload from "@/components/ui/Preload";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, MapPin, Calendar, Quote, Star } from "lucide-react";
+import { ArrowRight, MapPin, Calendar, Quote, Star, Sparkles, Award, Users, Clock } from "lucide-react";
 import { photoManager } from "@/lib/photoManager";
+import { useEffect, useMemo, useState } from "react";
 
 export default function HomePage() {
+  const [scrollY, setScrollY] = useState(0);
+
+  // Respecteer reduced-motion en optimaliseer scroll naar rAF + passive listener
+  const prefersReducedMotion = useMemo(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }, []);
+
+  useEffect(() => {
+    if (prefersReducedMotion) {
+      // Geen parallax updates bij reduced motion
+      setScrollY(0);
+      return;
+    }
+
+    let ticking = false;
+    const onScroll = () => {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(() => {
+          setScrollY(window.scrollY);
+          ticking = false;
+        });
+      }
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    // Initieel setten voor bovenaan positie
+    onScroll();
+
+    return () => {
+      window.removeEventListener('scroll', onScroll as EventListener);
+    };
+  }, [prefersReducedMotion]);
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen smooth-scroll">
+      {/* Preload critical resources */}
+      <Preload href="/images/hero-construction.jpg" as="image" />
+      <Preload href="/images/logo-yannova.png" as="image" />
+
       {/* Skip link for accessibility */}
       <a href="#main-content" className="skip-link">
         Ga naar hoofdinhoud
       </a>
       <Navigation />
       
-      {/* Hero Section */}
-      <section id="main-content" className="relative h-screen flex items-center justify-center overflow-hidden">
+      {/* Enhanced Hero Section */}
+      <section id="main-content" className="relative h-screen flex items-center justify-center overflow-hidden pt-28 sm:pt-32 md:pt-40 lg:pt-48 xl:pt-56">
         {/* Enhanced Background Image Overlay */}
         <div className="absolute inset-0 bg-gradient-hero z-10"></div>
+        <div className="absolute inset-0 bg-black/40 z-10"></div>
 
-        {/* Hero image met optimalisatie */}
+        {/* Hero image met parallax effect */}
         <div className="absolute inset-0">
           <Image
             src="/images/hero-construction.jpg"
             alt="Yannova Bouw - Professionele bouwprojecten in Keerbergen, Mechelen, Leuven. Van nieuwbouw tot renovatie met crepi gevelafwerking."
-            className="w-full h-full object-cover scale-105 animate-fade-in"
+            className="w-full h-full object-cover scale-105 animate-fade-in parallax-slow will-change-transform"
+            style={{ transform: `translateY(${scrollY * 0.5}px)` }}
             priority
             fill
             sizes="100vw"
@@ -35,85 +82,115 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-br from-yannova-dark via-yannova-gray to-yannova-dark"></div>
         </div>
 
-        {/* Floating Elements for Visual Interest */}
+        {/* Modern Particle System - niet laden bij reduced motion */}
+        {!prefersReducedMotion && (
+          <LazyLoad threshold={0.1} rootMargin="200px">
+            <ParticleSystem />
+          </LazyLoad>
+        )}
+
+        {/* Enhanced Floating Elements */}
         <div className="absolute inset-0 z-15 pointer-events-none">
           <div className="absolute top-20 left-10 w-20 h-20 bg-yannova-primary/20 rounded-full blur-xl animate-bounce-subtle"></div>
           <div className="absolute bottom-32 right-16 w-32 h-32 bg-yannova-primary/10 rounded-full blur-2xl animate-bounce-subtle animate-delay-1s"></div>
           <div className="absolute top-1/2 left-1/4 w-16 h-16 bg-white/10 rounded-full blur-lg animate-bounce-subtle animate-delay-2s"></div>
+          {/* Additional floating elements */}
+          <div className="absolute top-1/3 right-1/4 w-12 h-12 bg-yannova-primary/15 rounded-full blur-lg animate-bounce-subtle animate-delay-3s"></div>
+          <div className="absolute bottom-1/4 left-1/3 w-8 h-8 bg-white/20 rounded-full blur-md animate-bounce-subtle animate-delay-4s"></div>
         </div>
 
         {/* Enhanced Content */}
         <div className="relative z-20 max-w-5xl mx-auto px-4 text-center text-white">
-          {/* Logo */}
-          <div className="mb-8 animate-fade-in group cursor-pointer">
-            <div className="relative inline-block transform transition-all duration-500 hover:scale-110 hover:rotate-1 group-hover:drop-shadow-2xl">
-              <Image
-                src="/images/logo-yannova.png"
-                alt="Yannova Bouw Logo"
-                width={600}
-                height={300}
-                className="h-64 w-auto mx-auto filter brightness-0 invert transition-all duration-500 group-hover:brightness-100 group-hover:invert-0 group-hover:drop-shadow-[0_0_30px_rgba(255,255,255,0.8)]"
-                priority
-              />
-              {/* Glow effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-yannova-primary/20 via-white/10 to-yannova-primary/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 scale-150"></div>
-              {/* Floating particles effect */}
-              <div className="absolute -top-2 -left-2 w-2 h-2 bg-yannova-primary rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-bounce animate-delay-1s"></div>
-              <div className="absolute -top-1 -right-3 w-1.5 h-1.5 bg-white rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-bounce animate-delay-2s"></div>
-              <div className="absolute -bottom-2 -right-1 w-1 h-1 bg-yannova-primary rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-bounce animate-delay-3s"></div>
+          {/* Modern Logo with enhanced effects */}
+          <ScrollReveal delay={200}>
+            <div className="mb-8 group cursor-pointer">
+              <div className="relative inline-block transform transition-all duration-500 hover:scale-110 hover:rotate-1 group-hover:drop-shadow-2xl">
+                <Image
+                  src="/images/logo-yannova.png"
+                  alt="Yannova Bouw Logo"
+                  width={600}
+                  height={300}
+                  className="h-64 w-auto mx-auto filter brightness-0 invert transition-all duration-500 group-hover:brightness-100 group-hover:invert-0 group-hover:drop-shadow-[0_0_30px_rgba(255,255,255,0.8)]"
+                  priority
+                />
+                {/* Enhanced Glow effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-yannova-primary/20 via-white/10 to-yannova-primary/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 scale-150"></div>
+                {/* Modern floating particles effect */}
+                <div className="absolute -top-2 -left-2 w-2 h-2 bg-yannova-primary rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-bounce animate-delay-1s"></div>
+                <div className="absolute -top-1 -right-3 w-1.5 h-1.5 bg-white rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-bounce animate-delay-2s"></div>
+                <div className="absolute -bottom-2 -right-1 w-1 h-1 bg-yannova-primary rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-bounce animate-delay-3s"></div>
+                {/* Additional sparkle effects */}
+                <div className="absolute top-4 right-4 w-1 h-1 bg-yannova-primary rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-pulse animate-delay-4s"></div>
+                <div className="absolute bottom-4 left-4 w-1.5 h-1.5 bg-white rounded-full opacity-0 group-hover:opacity-100 group-hover:animate-pulse animate-delay-5s"></div>
+              </div>
             </div>
-          </div>
+          </ScrollReveal>
 
-          {/* Badge */}
-          <div className="inline-flex items-center px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-medium mb-8 animate-fade-in border border-white/20" role="banner">
-            <span className="w-2 h-2 bg-yannova-primary rounded-full mr-2 animate-pulse" aria-hidden="true"></span>
-            15+ Jaar Ervaring in Bouw
-          </div>
-
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 animate-fade-in-up leading-tight">
-            Van <span className="gradient-text">Begin</span> tot <span className="gradient-text">Eind</span>
-            <br />
-            <span className="text-4xl md:text-5xl lg:text-6xl font-semibold text-gray-200">Project Afronding</span>
-          </h1>
-
-          <p className="text-xl md:text-2xl lg:text-3xl mb-10 text-gray-200 max-w-4xl mx-auto leading-relaxed animate-fade-in-up animate-delay-200ms">
-            Van nieuwbouw tot renovatie, crepi gevelafwerking tot ramen en deuren -
-            wij verzorgen complete bouwprojecten met vakmanschap en passie in Keerbergen, Mechelen, Leuven en omgeving.
-          </p>
-
-          {/* Stats */}
-          <div className="flex flex-wrap justify-center gap-8 mb-12 animate-fade-in-up animate-delay-400ms" role="region" aria-label="Bedrijfsstatistieken">
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-yannova-primary" aria-label="100 plus projecten">100+</div>
-              <div className="text-sm md:text-base text-gray-300">Projecten</div>
+          {/* Modern Badge */}
+          <ScrollReveal delay={400}>
+            <div className="inline-flex items-center px-6 py-3 glass rounded-full text-sm font-medium mb-8 border border-white/20 text-shadow-md" role="banner">
+              <Sparkles className="w-4 h-4 text-yannova-primary mr-2 animate-pulse" />
+              <span className="text-white font-semibold">15+ Jaar Ervaring in Bouw</span>
             </div>
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-yannova-primary" aria-label="98 procent tevredenheid">98%</div>
-              <div className="text-sm md:text-base text-gray-300">Tevredenheid</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold text-yannova-primary" aria-label="24/7 bereikbaar">24/7</div>
-              <div className="text-sm md:text-base text-gray-300">Bereikbaar</div>
-            </div>
-          </div>
+          </ScrollReveal>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up mt-40 animate-delay-600ms">
-            <Link
-              href="/projecten"
-              className="group bg-gradient-primary hover:shadow-yannova-hover text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover-lift flex items-center justify-center gap-2 border border-yannova-primary/20 focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2"
-              aria-label="Bekijk onze projecten en portfolio"
-            >
-              Bekijk Projecten
-              <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform duration-200" aria-hidden="true" />
-            </Link>
-            <Link
-              href="/contact"
-              className="group bg-white/10 backdrop-blur-md hover:bg-white/20 text-white border-2 border-white/60 hover:border-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover-lift focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2"
-              aria-label="Neem contact op voor een offerte"
-            >
-              Neem Contact Op
-            </Link>
-          </div>
+          {/* Enhanced Main Heading */}
+          <ScrollReveal delay={600}>
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight text-white text-shadow-2xl">
+              Van <span className="gradient-text text-shadow-lg">Begin</span> tot <span className="gradient-text text-shadow-lg">Eind</span>
+              <br />
+              <span className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white text-shadow-xl">Project Afronding</span>
+            </h1>
+          </ScrollReveal>
+
+          {/* Enhanced Description */}
+          <ScrollReveal delay={800}>
+            <p className="text-xl md:text-2xl lg:text-3xl mb-10 text-white max-w-4xl mx-auto leading-relaxed text-shadow-lg">
+              Van nieuwbouw tot renovatie, crepi gevelafwerking tot ramen en deuren -
+              wij verzorgen complete bouwprojecten met vakmanschap en passie in Keerbergen, Mechelen, Leuven en omgeving.
+            </p>
+          </ScrollReveal>
+
+          {/* Enhanced Statistics */}
+          <ScrollReveal delay={1000}>
+            <div className="flex flex-wrap justify-center gap-8 mb-12" role="region" aria-label="Bedrijfsstatistieken">
+              <div className="text-center group">
+                <div className="text-3xl md:text-4xl font-bold text-yannova-primary group-hover:scale-110 transition-transform duration-300 text-shadow-lg" aria-label="100 plus projecten">100+</div>
+                <div className="text-sm md:text-base text-white text-shadow-md">Projecten</div>
+              </div>
+              <div className="text-center group">
+                <div className="text-3xl md:text-4xl font-bold text-yannova-primary group-hover:scale-110 transition-transform duration-300 text-shadow-lg" aria-label="98 procent tevredenheid">98%</div>
+                <div className="text-sm md:text-base text-white text-shadow-md">Tevredenheid</div>
+              </div>
+              <div className="text-center group">
+                <div className="text-3xl md:text-4xl font-bold text-yannova-primary group-hover:scale-110 transition-transform duration-300 text-shadow-lg" aria-label="24/7 bereikbaar">24/7</div>
+                <div className="text-sm md:text-base text-white text-shadow-md">Bereikbaar</div>
+              </div>
+            </div>
+          </ScrollReveal>
+
+          {/* Enhanced CTA Buttons */}
+          <ScrollReveal delay={800}>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-16">
+              <Link
+                href="/projecten"
+                className="group btn-modern px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover-lift flex items-center justify-center gap-2 border border-yannova-primary/20 focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2"
+                aria-label="Bekijk onze projecten en portfolio"
+              >
+                <Award className="w-5 h-5" />
+                Bekijk Projecten
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
+              </Link>
+              <Link
+                href="/contact"
+                className="group glass hover:bg-white/20 text-white border-2 border-white/60 hover:border-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover-lift focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2"
+                aria-label="Neem contact op voor een offerte"
+              >
+                <Users className="w-5 h-5 mr-2" />
+                Neem Contact Op
+              </Link>
+            </div>
+          </ScrollReveal>
 
           {/* Scroll Indicator */}
           <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce-subtle" aria-hidden="true">
@@ -124,22 +201,26 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Services Preview */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 to-white" aria-labelledby="services-heading">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 animate-fade-in-up">
-            <h2 id="services-heading" className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Onze <span className="gradient-text">Diensten</span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Van nieuwbouw tot renovatie, wij leveren kwaliteit en vakmanschap in de regio
-              Keerbergen, Mechelen, Putte, Bonheiden, Rijmenam en Leuven
-            </p>
-          </div>
+      {/* Enhanced Services Preview */}
+      <LazyLoad threshold={0.2} rootMargin="100px">
+        <section className="py-20 bg-gradient-to-br from-gray-50 to-white" aria-labelledby="services-heading">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <ScrollReveal delay={200}>
+              <div className="text-center mb-16">
+                <h2 id="services-heading" className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                  Onze <span className="gradient-text">Diensten</span>
+                </h2>
+                <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                  Van nieuwbouw tot renovatie, wij leveren kwaliteit en vakmanschap in de regio
+                  Keerbergen, Mechelen, Putte, Bonheiden, Rijmenam en Leuven
+                </p>
+              </div>
+            </ScrollReveal>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Nieuwbouw */}
-            <article className="group bg-white rounded-2xl p-8 shadow-soft hover:shadow-yannova transition-all duration-300 hover-lift animate-fade-in-up border border-gray-100">
+            <ScrollReveal delay={400} direction="up">
+              <article className="card-modern group">
               <div className="bg-stone-100 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8B4513" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/>
@@ -157,18 +238,20 @@ export default function HomePage() {
               <p className="text-gray-600 mb-6 leading-relaxed">
                 Complete nieuwbouwprojecten van fundament tot dak, uitgevoerd volgens de laatste normen en met oog voor detail.
               </p>
-              <Link
-                href="/diensten/nieuwbouw"
-                className="inline-flex items-center gap-2 text-yannova-primary font-semibold hover:text-yannova-primaryDark transition-colors duration-200 group focus-visible:outline-2 focus-visible:outline-yannova-primary focus-visible:outline-offset-2"
-                aria-label="Meer informatie over nieuwbouw diensten"
-              >
-                Meer informatie
-                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-200" aria-hidden="true" />
-              </Link>
-            </article>
+                <Link
+                  href="/diensten/nieuwbouw"
+                  className="inline-flex items-center gap-2 text-yannova-primary font-semibold hover:text-yannova-primaryDark transition-colors duration-200 group focus-visible:outline-2 focus-visible:outline-yannova-primary focus-visible:outline-offset-2"
+                  aria-label="Meer informatie over nieuwbouw diensten"
+                >
+                  Meer informatie
+                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-200" aria-hidden="true" />
+                </Link>
+              </article>
+            </ScrollReveal>
 
             {/* Verbouwing */}
-            <article className="group bg-white rounded-2xl p-8 shadow-soft hover:shadow-yannova transition-all duration-300 hover-lift animate-fade-in-up animate-delay-100ms">
+            <ScrollReveal delay={600} direction="up">
+              <article className="card-modern group">
               <div className="bg-stone-100 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8B4513" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="m15 12-8.373 8.373a1 1 0 1 1-3-3L12 9"/>
@@ -182,18 +265,20 @@ export default function HomePage() {
               <p className="text-gray-600 mb-6 leading-relaxed">
                 Geef uw woning een nieuwe uitstraling met onze professionele verbouwingsdiensten, van kleine aanpassingen tot complete renovaties.
               </p>
-              <Link
-                href="/diensten/verbouwing"
-                className="inline-flex items-center gap-2 text-yannova-primary font-semibold hover:text-yannova-primaryDark transition-colors duration-200 group focus-visible:outline-2 focus-visible:outline-yannova-primary focus-visible:outline-offset-2"
-                aria-label="Meer informatie over verbouwingsdiensten"
-              >
-                Meer informatie
-                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-200" aria-hidden="true" />
-              </Link>
-            </article>
+                <Link
+                  href="/diensten/verbouwing"
+                  className="inline-flex items-center gap-2 text-yannova-primary font-semibold hover:text-yannova-primaryDark transition-colors duration-200 group focus-visible:outline-2 focus-visible:outline-yannova-primary focus-visible:outline-offset-2"
+                  aria-label="Meer informatie over verbouwingsdiensten"
+                >
+                  Meer informatie
+                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-200" aria-hidden="true" />
+                </Link>
+              </article>
+            </ScrollReveal>
 
             {/* Renovatie */}
-            <article className="group bg-white rounded-2xl p-8 shadow-soft hover:shadow-yannova transition-all duration-300 hover-lift animate-fade-in-up animate-delay-200ms">
+            <ScrollReveal delay={800} direction="up">
+              <article className="card-modern group">
               <div className="bg-stone-100 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8B4513" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/>
@@ -206,31 +291,34 @@ export default function HomePage() {
               <p className="text-gray-600 mb-6 leading-relaxed">
                 Complete renovatiewerken inclusief crepi gevelafwerking, ramen en deuren vervanging. Van voorbereiding tot professionele documentatie met foto's.
               </p>
-              <Link
-                href="/diensten/renovatiewerken"
-                className="inline-flex items-center gap-2 text-yannova-primary font-semibold hover:text-yannova-primaryDark transition-colors duration-200 group focus-visible:outline-2 focus-visible:outline-yannova-primary focus-visible:outline-offset-2"
-                aria-label="Meer informatie over renovatie en crepi diensten"
-              >
-                Meer informatie
-                <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-200" aria-hidden="true" />
-              </Link>
-            </article>
+                <Link
+                  href="/diensten/renovatiewerken"
+                  className="inline-flex items-center gap-2 text-yannova-primary font-semibold hover:text-yannova-primaryDark transition-colors duration-200 group focus-visible:outline-2 focus-visible:outline-yannova-primary focus-visible:outline-offset-2"
+                  aria-label="Meer informatie over renovatie en crepi diensten"
+                >
+                  Meer informatie
+                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-200" aria-hidden="true" />
+                </Link>
+              </article>
+            </ScrollReveal>
           </div>
         </div>
       </section>
+      </LazyLoad>
 
       {/* Project Showcase Section */}
-      <section className="py-20 bg-white" aria-labelledby="projects-heading">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 animate-fade-in-up">
-            <h2 id="projects-heading" className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Onze <span className="gradient-text">Projecten</span>
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              Bekijk een selectie van onze succesvol afgeronde projecten. Van nieuwbouw tot renovatie - 
-              elk project wordt uitgevoerd met vakmanschap en aandacht voor detail.
-            </p>
-          </div>
+      <LazyLoad threshold={0.2} rootMargin="100px">
+        <section className="py-20 bg-white" aria-labelledby="projects-heading">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16 animate-fade-in-up">
+              <h2 id="projects-heading" className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                Onze <span className="gradient-text">Projecten</span>
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                Bekijk een selectie van onze succesvol afgeronde projecten. Van nieuwbouw tot renovatie -
+                elk project wordt uitgevoerd met vakmanschap en aandacht voor detail.
+              </p>
+            </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             {/* Moderne Villa */}
@@ -243,6 +331,7 @@ export default function HomePage() {
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   loading="lazy"
+                  decoding="async"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="absolute top-4 left-4">
@@ -282,6 +371,7 @@ export default function HomePage() {
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   loading="lazy"
+                  decoding="async"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="absolute top-4 left-4">
@@ -320,6 +410,7 @@ export default function HomePage() {
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   loading="lazy"
+                  decoding="async"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="absolute top-4 left-4">
@@ -362,18 +453,20 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      </LazyLoad>
 
       {/* Testimonials Section */}
-      <section className="py-20 bg-white" aria-labelledby="testimonials-heading">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 animate-fade-in-up">
-            <h2 id="testimonials-heading" className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Wat Onze <span className="gradient-text">Klanten</span> Zeggen
-            </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Ontdek waarom klanten kiezen voor Yannova Bouw
-            </p>
-          </div>
+      <LazyLoad threshold={0.2} rootMargin="100px">
+        <section className="py-20 bg-white" aria-labelledby="testimonials-heading">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16 animate-fade-in-up">
+              <h2 id="testimonials-heading" className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                Wat Onze <span className="gradient-text">Klanten</span> Zeggen
+              </h2>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                Ontdek waarom klanten kiezen voor Yannova Bouw
+              </p>
+            </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             {/* Testimonial 1 */}
@@ -475,18 +568,20 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      </LazyLoad>
 
       {/* Gespecialiseerde Diensten */}
-      <section className="py-20 bg-gray-50" aria-labelledby="specialized-services-heading">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 id="specialized-services-heading" className="text-4xl font-bold text-gray-900 mb-4">
-              Gespecialiseerde Renovatiediensten
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Van crepi en gevelrenovatie tot ramen en deuren - wij verzorgen complete renovatiewerken met professionele documentatie
-            </p>
-          </div>
+      <LazyLoad threshold={0.2} rootMargin="100px">
+        <section className="py-20 bg-gray-50" aria-labelledby="specialized-services-heading">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16">
+              <h2 id="specialized-services-heading" className="text-4xl font-bold text-gray-900 mb-4">
+                Gespecialiseerde Renovatiediensten
+              </h2>
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+                Van crepi en gevelrenovatie tot ramen en deuren - wij verzorgen complete renovatiewerken met professionele documentatie
+              </p>
+            </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
             {/* Crepi Werkzaamheden */}
@@ -632,18 +727,20 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      </LazyLoad>
 
       {/* FAQ Section voor SEO */}
-      <section className="py-20 bg-gray-50" aria-labelledby="faq-heading">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 animate-fade-in-up">
-            <h2 id="faq-heading" className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Veelgestelde <span className="gradient-text">Vragen</span>
-            </h2>
-            <p className="text-xl text-gray-600">
-              Antwoorden op de meest gestelde vragen over onze bouw- en renovatiediensten
-            </p>
-          </div>
+      <LazyLoad threshold={0.2} rootMargin="100px">
+        <section className="py-20 bg-gray-50" aria-labelledby="faq-heading">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-16 animate-fade-in-up">
+              <h2 id="faq-heading" className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                Veelgestelde <span className="gradient-text">Vragen</span>
+              </h2>
+              <p className="text-xl text-gray-600">
+                Antwoorden op de meest gestelde vragen over onze bouw- en renovatiediensten
+              </p>
+            </div>
 
           <div className="space-y-6 animate-fade-in-up animate-delay-200ms">
             <details className="bg-white rounded-lg shadow-soft p-6 group">
@@ -700,25 +797,77 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      </LazyLoad>
+
+      {/* FAQ JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: [
+              {
+                "@type": "Question",
+                name: "Wat zijn jullie werkgebieden?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text:
+                    "Wij werken voornamelijk in Keerbergen, Mechelen, Leuven, Putte, Bonheiden en Rijmenam. Voor grotere projecten kunnen we ook buiten deze regio werken. Neem contact op voor de mogelijkheden.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Hoe lang duurt een gemiddelde renovatie?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text:
+                    "De duur van een renovatieproject varieert afhankelijk van de omvang. Een badkamerrenovatie duurt gemiddeld 2-3 weken, een complete woningrenovatie kan 2-6 maanden duren. We geven altijd een realistische planning vooraf.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Werken jullie met crepi gevelafwerking?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text:
+                    "Ja, crepi gevelafwerking is één van onze specialiteiten. We werken met kwalitatieve crepi producten en zorgen voor een perfecte afwerking. Van kleuradvies tot voorbehandeling en afwerking - alles wordt professioneel uitgevoerd.",
+                },
+              },
+              {
+                "@type": "Question",
+                name: "Geven jullie garantie op jullie werk?",
+                acceptedAnswer: {
+                  "@type": "Answer",
+                  text:
+                    "Ja, we geven standaard 2 jaar garantie op al onze werkzaamheden. Voor specifieke materialen geldt vaak de garantie van de fabrikant, die kan oplopen tot 10 jaar. We documenteren alles met foto's zodat garantieclaims probleemloos verlopen.",
+                },
+              },
+            ],
+          }),
+        }}
+      />
 
       {/* CTA Section */}
-      <section className="bg-yannova-primary py-20" aria-labelledby="cta-heading">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 id="cta-heading" className="text-4xl font-bold text-white mb-6">
-            Klaar om uw renovatieproject te starten?
-          </h2>
-          <p className="text-xl text-white/90 mb-8">
-            Neem contact op voor een vrijblijvend gesprek over uw crepi, ramen of andere renovatiewerken
-          </p>
-          <Link
-            href="/contact"
-            className="inline-block bg-white text-yannova-primary px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 hover:scale-105 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2"
-            aria-label="Vraag een offerte aan voor uw renovatieproject"
-          >
-            Vraag Offerte Aan
-          </Link>
-        </div>
-      </section>
+      <LazyLoad threshold={0.2} rootMargin="100px">
+        <section className="bg-yannova-primary py-20" aria-labelledby="cta-heading">
+          <div className="max-w-4xl mx-auto px-4 text-center">
+            <h2 id="cta-heading" className="text-4xl font-bold text-white mb-6">
+              Klaar om uw renovatieproject te starten?
+            </h2>
+            <p className="text-xl text-white/90 mb-8">
+              Neem contact op voor een vrijblijvend gesprek over uw crepi, ramen of andere renovatiewerken
+            </p>
+            <Link
+              href="/contact"
+              className="inline-block bg-white text-yannova-primary px-8 py-4 rounded-lg font-semibold text-lg transition-all duration-300 hover:scale-105 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2"
+              aria-label="Vraag een offerte aan voor uw renovatieproject"
+            >
+              Vraag Offerte Aan
+            </Link>
+          </div>
+        </section>
+      </LazyLoad>
 
       <Footer />
       {/* <Chatbot /> */}
