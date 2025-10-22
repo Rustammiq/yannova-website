@@ -53,7 +53,12 @@ const InlinePhotoEditor: React.FC<InlinePhotoEditorProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [editingPhoto, setEditingPhoto] = useState<Photo | null>(null);
+  const [mounted, setMounted] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Upload photo
   const handleUpload = async (files: FileList) => {
@@ -136,6 +141,25 @@ const InlinePhotoEditor: React.FC<InlinePhotoEditorProps> = ({
       toast.error('Fout bij bijwerken van foto');
     }
   };
+
+  // Prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ${className}`}>
+        {photos.map((photo) => (
+          <div key={photo.id} className={`${aspectRatio} relative overflow-hidden rounded-lg`}>
+            <Image
+              src={photo.url}
+              alt={photo.alt}
+              width={300}
+              height={300}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   if (!isAdmin || !isEditing) {
     return (

@@ -16,14 +16,25 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession();
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   const isAdmin = session?.user?.role === 'admin';
 
   useEffect(() => {
+    setMounted(true);
     if (status !== 'loading') {
       setIsLoading(false);
     }
   }, [status]);
+
+  // Prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <AdminContext.Provider value={{ isAdmin: false, isEditing: false, toggleEditing: () => {}, isLoading: true }}>
+        {children}
+      </AdminContext.Provider>
+    );
+  }
 
   const toggleEditing = () => {
     if (isAdmin) {

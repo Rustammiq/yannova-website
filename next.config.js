@@ -58,6 +58,14 @@ const nextConfig = {
       };
     }
 
+    // Fix for 'self is not defined' error
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        'typeof window': JSON.stringify(isServer ? 'undefined' : 'object'),
+        'typeof self': JSON.stringify(isServer ? 'undefined' : 'object'),
+      })
+    );
+
     // Performance optimalisaties
     if (!dev) {
       config.optimization = {
