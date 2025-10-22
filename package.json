@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
+    "@vercel/speed-insights": "^1.2.0",
     "bcryptjs": "^2.4.3",
     "clsx": "^2.1.1",
     "critters": "^0.0.23",

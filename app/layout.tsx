@@ -10,6 +10,7 @@ import ServiceWorkerRegistration from "@/components/pwa/ServiceWorkerRegistratio
 import PWAInstallPrompt from "@/components/pwa/PWAInstallPrompt";
 import OfflinePage from "@/components/pwa/OfflinePage";
 import AdminToggle from "@/components/admin/AdminToggle";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -134,6 +135,7 @@ export default function RootLayout({
               <OfflinePage />
               <AdminToggle />
             </Providers>
+            <SpeedInsights />
           </body>
         </html>
   );
