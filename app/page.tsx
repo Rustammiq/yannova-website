@@ -86,7 +86,7 @@ export default function HomePage() {
       <Navigation />
       
       {/* Enhanced Hero Section */}
-      <section id="main-content" className="relative h-screen flex items-center justify-center overflow-hidden pt-28 sm:pt-32 md:pt-40 lg:pt-48 xl:pt-56">
+      <section id="main-content" className="relative h-screen flex items-center justify-center overflow-hidden pt-20 sm:pt-24 md:pt-32 lg:pt-40 xl:pt-48">
         {/* Enhanced Background Image Overlay */}
         <div className="absolute inset-0 bg-gradient-hero z-10"></div>
         <div className="absolute inset-0 bg-black/40 z-10"></div>
@@ -151,19 +151,19 @@ export default function HomePage() {
 
           {/* Modern Badge */}
           <ScrollReveal delay={400}>
-            <div className="inline-flex items-center px-6 py-3 glass rounded-full text-sm font-medium mb-8 border border-white/20 text-shadow-md" role="banner">
-              <Sparkles className="w-4 h-4 text-yannova-primary mr-2 animate-pulse" />
+            <div className="inline-flex items-center px-4 sm:px-6 py-2 sm:py-3 glass rounded-full text-xs sm:text-sm font-medium mb-6 sm:mb-8 border border-white/20 text-shadow-md mx-4 sm:mx-0" role="banner">
+              <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-yannova-primary mr-2 animate-pulse" />
               <span className="text-white font-semibold">15+ Jaar Ervaring in Bouw</span>
             </div>
           </ScrollReveal>
 
           {/* Enhanced Main Heading */}
           <ScrollReveal delay={600}>
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight text-white text-shadow-2xl">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold mb-4 sm:mb-6 leading-tight text-white text-shadow-2xl px-4">
               <InlineTextEditor
                 value={displayTitle}
                 onSave={mainTitle.updateContent}
-                className="text-5xl md:text-7xl lg:text-8xl font-bold leading-tight text-white text-shadow-2xl"
+                className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl font-bold leading-tight text-white text-shadow-2xl"
                 multiline={true}
                 fieldName="Hoofdtitel"
               />
@@ -172,11 +172,11 @@ export default function HomePage() {
 
           {/* Enhanced Description */}
           <ScrollReveal delay={800}>
-            <p className="text-xl md:text-2xl lg:text-3xl mb-10 text-white max-w-4xl mx-auto leading-relaxed text-shadow-lg">
+            <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl mb-8 md:mb-10 text-white max-w-4xl mx-auto leading-relaxed text-shadow-lg px-4">
               <InlineTextEditor
                 value={displayDescription}
                 onSave={mainDescription.updateContent}
-                className="text-xl md:text-2xl lg:text-3xl text-white leading-relaxed text-shadow-lg"
+                className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-white leading-relaxed text-shadow-lg"
                 multiline={true}
                 fieldName="Hoofdbeschrijving"
               />
@@ -185,49 +185,49 @@ export default function HomePage() {
 
           {/* Enhanced Statistics */}
           <ScrollReveal delay={1000}>
-            <div className="flex flex-wrap justify-center gap-8 mb-12" role="region" aria-label="Bedrijfsstatistieken">
+            <div className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-8 mb-8 md:mb-12 px-4" role="region" aria-label="Bedrijfsstatistieken">
               <div className="text-center group">
-                <div className="text-3xl md:text-4xl font-bold text-yannova-primary group-hover:scale-110 transition-transform duration-300 text-shadow-lg" aria-label="100 plus projecten">100+</div>
-                <div className="text-sm md:text-base text-white text-shadow-md">Projecten</div>
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-yannova-primary group-hover:scale-110 transition-transform duration-300 text-shadow-lg" aria-label="100 plus projecten">100+</div>
+                <div className="text-xs sm:text-sm md:text-base text-white text-shadow-md">Projecten</div>
               </div>
               <div className="text-center group">
-                <div className="text-3xl md:text-4xl font-bold text-yannova-primary group-hover:scale-110 transition-transform duration-300 text-shadow-lg" aria-label="98 procent tevredenheid">98%</div>
-                <div className="text-sm md:text-base text-white text-shadow-md">Tevredenheid</div>
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-yannova-primary group-hover:scale-110 transition-transform duration-300 text-shadow-lg" aria-label="98 procent tevredenheid">98%</div>
+                <div className="text-xs sm:text-sm md:text-base text-white text-shadow-md">Tevredenheid</div>
               </div>
               <div className="text-center group">
-                <div className="text-3xl md:text-4xl font-bold text-yannova-primary group-hover:scale-110 transition-transform duration-300 text-shadow-lg" aria-label="24/7 bereikbaar">24/7</div>
-                <div className="text-sm md:text-base text-white text-shadow-md">Bereikbaar</div>
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-yannova-primary group-hover:scale-110 transition-transform duration-300 text-shadow-lg" aria-label="24/7 bereikbaar">24/7</div>
+                <div className="text-xs sm:text-sm md:text-base text-white text-shadow-md">Bereikbaar</div>
               </div>
             </div>
           </ScrollReveal>
 
           {/* Enhanced CTA Buttons */}
           <ScrollReveal delay={800}>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-16">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mt-8 sm:mt-12 md:mt-16 px-4">
               <Link
                 href="/projecten"
-                className="group btn-modern px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover-lift flex items-center justify-center gap-2 border border-yannova-primary/20 focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2"
+                className="group btn-modern px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg transition-all duration-300 hover-lift flex items-center justify-center gap-2 border border-yannova-primary/20 focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2"
                 aria-label="Bekijk onze projecten en portfolio"
               >
-                <Award className="w-5 h-5" />
+                <Award className="w-4 h-4 sm:w-5 sm:h-5" />
                 Bekijk Projecten
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform duration-200" />
               </Link>
               <Link
                 href="/contact"
-                className="group glass hover:bg-white/20 text-white border-2 border-white/60 hover:border-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 hover-lift focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2"
+                className="group glass hover:bg-white/20 text-white border-2 border-white/60 hover:border-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg transition-all duration-300 hover-lift focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2"
                 aria-label="Neem contact op voor een offerte"
               >
-                <Users className="w-5 h-5 mr-2" />
+                <Users className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 Neem Contact Op
               </Link>
             </div>
           </ScrollReveal>
 
           {/* Scroll Indicator */}
-          <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce-subtle" aria-hidden="true">
-            <div className="w-6 h-10 border-2 border-white/60 rounded-full flex justify-center">
-              <div className="w-1 h-3 bg-white/60 rounded-full mt-2 animate-pulse"></div>
+          <div className="absolute bottom-4 sm:bottom-6 md:bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce-subtle" aria-hidden="true">
+            <div className="w-5 h-8 sm:w-6 sm:h-10 border-2 border-white/60 rounded-full flex justify-center">
+              <div className="w-1 h-2 sm:h-3 bg-white/60 rounded-full mt-2 animate-pulse"></div>
             </div>
           </div>
         </div>

@@ -19,6 +19,12 @@ export const metadata: Metadata = {
     template: "%s | Yannova Bouw"
   },
   description: "Professionele bouwoplossingen van begin tot eind. Yannova Bouw realiseert uw droomproject met vakmanschap en passie. Nieuwbouw, verbouwingen en renovaties in Keerbergen, Mechelen, Putte, Bonheiden, Rijmenam en Leuven.",
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
   keywords: [
     "bouw", "renovatie", "nieuwbouw", "aannemer", "Yannova",
     "verbouwing", "dakwerken", "gevelbekleding", "badkamer renovatie", "keuken installatie",
