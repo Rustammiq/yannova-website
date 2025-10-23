@@ -25,6 +25,7 @@ yarn-error.log*
 # Local env files
 .env*.local
 .env
+!.env.example
 
 # Google Cloud credentials
 google-credentials.json
@@ -46,6 +47,7 @@ google-credentials.json
 
 # Vercel
 .vercel
+!vercel.json
 
 # TypeScript
 *.tsbuildinfo
